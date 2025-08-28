@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facil — Confirmação / Recibo</title>
+  <meta name="description" content="Recibo da sua aposta na Lotofácil da Independência. Visualize o protocolo, números, cotas e valor total." />
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --bg-elev: #111217;
+      --card: #14161d;
+      --card-2: #191c24;
+      --text: #e6e8ef;
+      --muted: #98a1b3;
+      --border: #222533;
+      --primary: #6ee7b7;
+      --primary-2: #34d399;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --ok: #22c55e;
+      --link: #60a5fa;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 14px;
+      --focus: 0 0 0 3px rgba(110,231,183,.35);
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+    [data-theme="light"] {
+      --bg: #f7f8fb;
+      --bg-elev: #ffffff;
+      --card: #ffffff;
+      --card-2: #f7f9fc;
+      --text: #0e1320;
+      --muted: #475069;
+      --border: #e6e9f0;
+      --primary: #0ea5e9;
+      --primary-2: #0284c7;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --ok: #16a34a;
+      --link: #2563eb;
+      --shadow: 0 8px 24px rgba(2,6,23,.08);
+      --focus: 0 0 0 3px rgba(14,165,233,.25);
+    }
+
+    html, body {
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(52,211,153,.08), transparent 40%),
+                  radial-gradient(800px 500px at 110% 10%, rgba(14,165,233,.08), transparent 30%),
+                  var(--bg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: saturate(1.2) blur(8px);
+      background: color-mix(in oklab, var(--bg-elev) 85%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-in {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .brand .logo {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #0a0d12;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(110,231,183,.35);
+    }
+    .grow {
+      flex: 1;
+    }
+    .bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .link {
+      color: var(--link);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .link:hover { text-decoration: underline; }
+
+    .theme {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--card-2);
+      color: var(--text);
+      cursor: pointer;
+      transition: .2s ease background, .2s ease transform;
+      user-select: none;
+    }
+    .theme:hover { transform: translateY(-1px); }
+    .theme .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent);
+    }
+
+    .shell {
+      max-width: 1120px;
+      margin: 26px auto 80px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, color-mix(in oklab, var(--card) 90%, transparent) 0%, var(--card) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+    @media (min-width: 720px) {
+      .card { padding: 26px; }
+    }
+
+    h1.title {
+      margin: 0 0 14px 0;
+      font-size: 1.4rem;
+      letter-spacing: .3px;
+    }
+    p.sub {
+      margin: 0 0 18px 0;
+      color: var(--muted);
+      font-size: .98rem;
+    }
+
+    .header-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: color-mix(in oklab, var(--ok) 20%, transparent);
+      color: color-mix(in oklab, var(--ok) 85%, #fff);
+      border: 1px solid color-mix(in oklab, var(--ok) 45%, var(--border));
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+    @media (min-width: 880px) {
+      .grid.two {
+        grid-template-columns: 1.2fr .8fr;
+        gap: 18px;
+      }
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+    }
+    @media (min-width: 560px) {
+      .kv { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .kv .item {
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .kv .k {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .kv .v {
+      font-weight: 700;
+      letter-spacing: .2px;
+      font-size: 1rem;
+      word-break: break-word;
+    }
+
+    .numbers {
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .numbers .hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .numbers .hdr .lab {
+      font-weight: 700;
+    }
+    .grid-nums {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .num {
+      display: grid;
+      place-items: center;
+      height: 46px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: linear-gradient(180deg, var(--card) 0%, color-mix(in oklab, var(--card) 82%, transparent) 100%);
+      font-weight: 700;
+      letter-spacing: .2px;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .num.on {
+      border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+      color: #031a14;
+      background: linear-gradient(180deg, color-mix(in oklab, var(--primary) 30%, var(--card)) 0%, color-mix(in oklab, var(--primary) 15%, var(--card-2)) 100%);
+      box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--primary) 35%, transparent);
+    }
+    .num .tag {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: .68rem;
+      background: color-mix(in oklab, var(--primary) 16%, transparent);
+      color: color-mix(in oklab, var(--primary) 80%, #07362a);
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid color-mix(in oklab, var(--primary) 40%, var(--border));
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--card-2);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: .2s ease transform, .2s ease background, .2s ease border;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      user-select: none;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:focus-visible { outline: none; box-shadow: var(--focus); }
+    .btn.primary {
+      border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+      background: linear-gradient(180deg, color-mix(in oklab, var(--primary) 22%, var(--card-2)) 0%, color-mix(in oklab, var(--primary) 12%, var(--card)) 100%);
+      color: color-mix(in oklab, var(--primary) 95%, #04140f);
+    }
+    .btn.ok {
+      border-color: color-mix(in oklab, var(--ok) 40%, var(--border));
+      background: color-mix(in oklab, var(--ok) 16%, var(--card-2));
+      color: color-mix(in oklab, var(--ok) 95%, #031407);
+    }
+    .btn.ghost {
+      background: transparent;
+    }
+    .btn.danger {
+      border-color: color-mix(in oklab, var(--danger) 40%, var(--border));
+      color: color-mix(in oklab, var(--danger) 88%, #1a0a0a);
+      background: color-mix(in oklab, var(--danger) 10%, var(--card-2));
+    }
+
+    .alert {
+      display: none;
+      border: 1px solid var(--border);
+      background: var(--card-2);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin: 10px 0;
+    }
+    .alert.on { display: block; }
+    .alert.err {
+      border-color: color-mix(in oklab, var(--danger) 40%, var(--border));
+      background: color-mix(in oklab, var(--danger) 12%, var(--card-2));
+      color: color-mix(in oklab, var(--danger) 90%, #120606);
+    }
+    .alert .title { font-weight: 800; margin-bottom: 6px; }
+    .muted { color: var(--muted); }
+
+    .sec {
+      margin-top: 18px;
+    }
+    .sec h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.1rem;
+    }
+    .note {
+      font-size: .9rem;
+      color: var(--muted);
+    }
+
+    .footer {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .skeleton {
+      border-radius: 8px;
+      background: linear-gradient(90deg, color-mix(in oklab, var(--card) 85%, transparent), color-mix(in oklab, var(--card-2) 65%, transparent), color-mix(in oklab, var(--card) 85%, transparent));
+      background-size: 200% 100%;
+      animation: sk 1.2s infinite linear;
+    }
+    @keyframes sk {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .s-kv { height: 48px; }
+    .s-title { height: 18px; width: 160px; }
+    .s-line { height: 14px; }
+    .s-num { height: 46px; }
+
+    @media print {
+      .topbar, .actions, .footer { display: none !important; }
+      .card {
+        box-shadow: none !important;
+        border: 1px solid #bbb !important;
+      }
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .num.on {
+        border-color: #16a34a !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <div class="topbar-in">
+      <a class="brand" href="/" aria-label="Ir para a página inicial">
+        <span class="logo">F</span>
+        <span>Facil</span>
+      </a>
+      <div class="grow"></div>
+      <nav class="bar-actions" aria-label="Ações">
+        <a id="helpLink" class="link" href="#"  rel="noopener">Ajuda</a>
+        <button id="toggleTheme" class="theme" type="button" aria-label="Alternar tema">
+          <span class="dot" aria-hidden="true"></span>
+          <span class="txt">Tema</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell" role="main">
+    <article class="card" aria-labelledby="t1">
+      <div class="header-line">
+        <div>
+          <h1 class="title" id="t1">Confirmação / Recibo</h1>
+          <p class="sub">Este é o comprovante da sua aposta registrada. Guarde o protocolo para eventuais conferências.</p>
+        </div>
+        <span id="statusBadge" class="badge" aria-live="polite">
+          Registrado
+        </span>
+      </div>
+
+      <div id="errBox" class="alert err" role="alert" aria-live="assertive">
+        <div class="title">Não foi possível carregar seu recibo</div>
+        <div class="msg">Verifique o link ou tente novamente em instantes.</div>
+      </div>
+
+      <div class="grid two" id="content" aria-busy="true">
+        <section aria-label="Detalhes do recibo">
+          <div class="kv" id="kv">
+            <div class="item">
+              <div class="k">Protocolo</div>
+              <div class="v" id="kv-protocol"><span class="skeleton s-line" style="display:inline-block;width:160px;"></span></div>
+            </div>
+            <div class="item">
+              <div class="k">Participante</div>
+              <div class="v" id="kv-name"><span class="skeleton s-line" style="display:inline-block;width:140px;"></span></div>
+            </div>
+            <div class="item">
+              <div class="k">Convite</div>
+              <div class="v" id="kv-invite"><span class="skeleton s-line" style="display:inline-block;width:90px;"></span></div>
+            </div>
+            <div class="item">
+              <div class="k">Data e hora</div>
+              <div class="v" id="kv-datetime"><span class="skeleton s-line" style="display:inline-block;width:180px;"></span></div>
+            </div>
+            <div class="item">
+              <div class="k">Quantidade de cotas</div>
+              <div class="v" id="kv-shares"><span class="skeleton s-line" style="display:inline-block;width:80px;"></span></div>
+            </div>
+            <div class="item">
+              <div class="k">Valor total</div>
+              <div class="v" id="kv-total"><span class="skeleton s-line" style="display:inline-block;width:100px;"></span></div>
+            </div>
+          </div>
+
+          <div class="sec">
+            <h2>Números selecionados</h2>
+            <div class="numbers">
+              <div class="hdr">
+                <div class="lab"><span id="countSel">0</span>/15 números</div>
+                <div class="note">Lotofácil da Independência</div>
+              </div>
+              <div id="gridNums" class="grid-nums" aria-live="polite" aria-label="Números escolhidos">
+                <!-- skeleton -->
+                <template id="skeletonNums">
+                  <div class="num skeleton s-num"></div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="btnPrint" class="btn primary" type="button">Imprimir / Salvar PDF</button>
+            <button id="btnShare" class="btn ok" type="button">Compartilhar recibo</button>
+            <button id="btnCopyLink" class="btn ghost" type="button">Copiar link</button>
+            <button id="btnCopyProtocol" class="btn ghost" type="button">Copiar protocolo</button>
+          </div>
+        </section>
+
+        <aside aria-label="Resumo financeiro e próximos passos">
+          <div class="sec">
+            <h2>Resumo</h2>
+            <div class="kv">
+              <div class="item">
+                <div class="k">Valor por cota</div>
+                <div class="v" id="kv-unit"><span class="skeleton s-line" style="display:inline-block;width:80px;"></span></div>
+              </div>
+              <div class="item">
+                <div class="k">Status</div>
+                <div class="v" id="kv-status"><span class="skeleton s-line" style="display:inline-block;width:80px;"></span></div>
+              </div>
+              <div class="item">
+                <div class="k">Planilha</div>
+                <div class="v" id="kv-sheet"><span class="skeleton s-line" style="display:inline-block;width:120px;"></span></div>
+              </div>
+            </div>
+
+            <div class="actions" style="margin-top:12px">
+              <a id="btnNewBet" class="btn" href="#" role="button">Nova aposta</a>
+              <a id="btnExit" class="btn danger" href="/" role="button">Sair</a>
+            </div>
+
+            <div class="sec">
+              <h2>Observações</h2>
+              <p class="note">
+                - Este recibo confirma o registro da sua aposta no sistema e na planilha. A validação de prêmios é
+                responsabilidade da loteria oficial. Guarde o protocolo.
+              </p>
+              <p class="note" id="noteSheet"></p>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="footer">
+        <div>Precisa de ajuda? <a id="helpLink2" href="#"  rel="noopener" class="link">Fale com o suporte</a>.</div>
+        <div>Facil © <span id="year"></span></div>
+      </div>
+    </article>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const CONFIG = {
+        routes: {
+          create: "/criar",
+          review: "/resumo",
+          receipt: "/recibo"
+        },
+        api: {
+          base: "/api",
+          ticket: (id) => `/api/tickets/${encodeURIComponent(id)}`,
+        },
+        sheetViewUrl: null, // Opcional: link público da planilha/aba
+        defaultInviteName: "Participante",
+        supportUrl: "https://wa.me/5500000000000?text=Preciso%20de%20ajuda%20no%20Facil"
+      };
+
+      // Utils
+      const $ = (sel, el = document) => el.querySelector(sel);
+      const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
+      const toBRL = (n) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n || 0);
+      const fmtDateTime = (iso) => {
+        try {
+          const d = iso ? new Date(iso) : new Date();
+          return new Intl.DateTimeFormat("pt-BR", {
+            dateStyle: "short",
+            timeStyle: "short"
+          }).format(d);
+        } catch {
+          return iso || "";
+        }
+      };
+
+      function themeInit() {
+        const key = "facil_theme";
+        const v = localStorage.getItem(key) || "dark";
+        document.documentElement.setAttribute("data-theme", v);
+        const $btn = $("#toggleTheme");
+        $btn?.addEventListener("click", () => {
+          const cur = document.documentElement.getAttribute("data-theme") || "dark";
+          const nxt = cur === "dark" ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", nxt);
+          localStorage.setItem(key, nxt);
+        });
+      }
+
+      function fillYear() {
+        const y = new Date().getFullYear();
+        $("#year").textContent = String(y);
+      }
+
+      function showError(msgTitle, msg) {
+        const $err = $("#errBox");
+        $err.classList.add("on");
+        $err.querySelector(".title").textContent = msgTitle || "Erro";
+        $err.querySelector(".msg").textContent = msg || "Ocorreu um erro inesperado.";
+      }
+
+      function skeletonNums(count = 25) {
+        const $grid = $("#gridNums");
+        $grid.innerHTML = "";
+        const tpl = $("#skeletonNums").content;
+        for (let i = 0; i < count; i++) {
+          $grid.appendChild(document.importNode(tpl, true));
+        }
+      }
+
+      function renderNumbers(selected = []) {
+        const $grid = $("#gridNums");
+        $grid.innerHTML = "";
+        const set = new Set(selected);
+        for (let i = 1; i <= 25; i++) {
+          const d = document.createElement("div");
+          d.className = "num" + (set.has(i) ? " on" : "");
+          d.textContent = i.toString().padStart(2, "0");
+          if (set.has(i)) {
+            const tag = document.createElement("span");
+            tag.className = "tag";
+            tag.textContent = "OK";
+            d.appendChild(tag);
+          }
+          $grid.appendChild(d);
+        }
+        $("#countSel").textContent = String(selected.length);
+      }
+
+      async function fetchTicket(id) {
+        const url = CONFIG.api.ticket(id);
+        const res = await fetch(url, { method: "GET", headers: { "accept": "application/json" } });
+        if (!res.ok) {
+          throw new Error("Ticket não encontrado");
+        }
+        return res.json();
+      }
+
+      function readParams() {
+        const p = new URLSearchParams(location.search);
+        const ticketId = p.get("ticket") || p.get("id") || p.get("tx") || "";
+        const invite = p.get("invite") || "";
+        return { ticketId, invite };
+      }
+
+      function safeLocalTicket() {
+        try {
+          const raw = localStorage.getItem("facil_last_ticket");
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch {
+          return null;
+        }
+      }
+
+      function setLinks(invite) {
+        const base = location.origin;
+        const receiptURL = new URL(base + (CONFIG.routes.receipt || "/recibo"));
+        if (invite) receiptURL.searchParams.set("invite", invite);
+        const link = receiptURL.toString();
+
+        $("#helpLink").href = CONFIG.supportUrl || "#";
+        $("#helpLink2").href = CONFIG.supportUrl || "#";
+
+        $("#btnNewBet").href = base + (CONFIG.routes.create || "/criar") + (invite ? `?invite=${encodeURIComponent(invite)}` : "");
+        $("#btnExit").href = base + "/";
+        $("#btnCopyLink")?.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(window.location.href);
+            const el = $("#btnCopyLink");
+            el.textContent = "Link copiado!";
+            setTimeout(() => (el.textContent = "Copiar link"), 1400);
+          } catch {
+            alert("Não foi possível copiar o link.");
+          }
+        });
+        $("#btnShare")?.addEventListener("click", async () => {
+          try {
+            const title = "Recibo — Facil";
+            const text = "Confira o recibo da sua aposta na Lotofácil da Independência.";
+            if (navigator.share) {
+              await navigator.share({ title, text, url: window.location.href });
+            } else {
+              await navigator.clipboard.writeText(window.location.href);
+              alert("Link do recibo copiado.");
+            }
+          } catch { /* ignore */ }
+        });
+      }
+
+      function bindPrint(protocol) {
+        $("#btnPrint")?.addEventListener("click", () => {
+          // Dica: use “Salvar como PDF” no diálogo do navegador
+          window.print();
+        });
+
+        $("#btnCopyProtocol")?.addEventListener("click", async () => {
+          if (!protocol) return;
+          try {
+            await navigator.clipboard.writeText(protocol);
+            const el = $("#btnCopyProtocol");
+            el.textContent = "Protocolo copiado!";
+            setTimeout(() => (el.textContent = "Copiar protocolo"), 1400);
+          } catch {
+            alert("Não foi possível copiar o protocolo.");
+          }
+        });
+      }
+
+      function applyTicketToUI(ticket) {
+        // ticket esperado:
+        // {
+        //   id: "FACIL-ABC123",
+        //   status: "registered",
+        //   invite: "INV-XYZ",
+        //   participant: { name: "Nome", email?: "" },
+        //   numbers: [1..25] (15 selecionados),
+        //   shares: 2,
+        //   unitValue: 5.0,
+        //   totalValue: 10.0,
+        //   createdAt: "2025-08-25T10:21:00.000Z",
+        //   sheet: { id: "...", tab: "Jogos", row: 42, viewUrl?: "..." }
+        // }
+        $("#content").setAttribute("aria-busy", "false");
+
+        // Cabeçalho e badges
+        const statusMap = {
+          registered: { text: "Registrado", cls: "badge" },
+          pending: { text: "Pendente", cls: "badge", color: "warning" },
+          cancelled: { text: "Cancelado", cls: "badge" },
+        };
+        const st = statusMap[ticket.status] || statusMap["registered"];
+        const $badge = $("#statusBadge");
+        $badge.textContent = st.text;
+
+        // KV
+        $("#kv-protocol").textContent = ticket.id || "-";
+        $("#kv-name").textContent = (ticket.participant?.name || CONFIG.defaultInviteName);
+        $("#kv-invite").textContent = ticket.invite || "-";
+        $("#kv-datetime").textContent = fmtDateTime(ticket.createdAt);
+        $("#kv-shares").textContent = String(ticket.shares || 1);
+        $("#kv-total").textContent = toBRL(ticket.totalValue || (ticket.unitValue || 0) * (ticket.shares || 1));
+
+        $("#kv-unit").textContent = toBRL(ticket.unitValue || 0);
+        $("#kv-status").textContent = st.text;
+
+        const viewUrl = ticket.sheet?.viewUrl || CONFIG.sheetViewUrl;
+        if (viewUrl) {
+          const a = document.createElement("a");
+          a.href = viewUrl;
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.className = "link";
+          a.textContent = "Abrir planilha";
+          $("#kv-sheet").innerHTML = "";
+          $("#kv-sheet").appendChild(a);
+          $("#noteSheet").textContent = "Registro salvo na planilha. Você pode verificar o lançamento pelo link acima.";
+        } else {
+          $("#kv-sheet").textContent = "Registrado";
+          $("#noteSheet").textContent = "Registro salvo na planilha. O link público pode ser fornecido pelo administrador.";
+        }
+
+        // Números
+        const nums = Array.isArray(ticket.numbers) ? ticket.numbers.slice().sort((a, b) => a - b) : [];
+        renderNumbers(nums);
+
+        // Ações dependentes
+        bindPrint(ticket.id);
+      }
+
+      async function init() {
+        themeInit();
+        fillYear();
+
+        const { ticketId, invite } = readParams();
+        setLinks(invite);
+        skeletonNums();
+
+        let ticket = null;
+
+        try {
+          if (ticketId) {
+            ticket = await fetchTicket(ticketId);
+          } else {
+            // fallback: último ticket do fluxo anterior
+            ticket = safeLocalTicket();
+            if (!ticket || !ticket.id) {
+              throw new Error("Sem ticket");
+            }
+            // Garante que URL contenha o protocolo para compartilhamento
+            const url = new URL(window.location.href);
+            url.searchParams.set("ticket", ticket.id);
+            if (invite && !url.searchParams.get("invite")) url.searchParams.set("invite", invite);
+            history.replaceState({}, "", url.toString());
+          }
+        } catch (e) {
+          showError("Recibo não encontrado", "Confira se o link está correto ou solicite o reenvio ao administrador.");
+          $("#content").setAttribute("aria-busy", "false");
+          return;
+        }
+
+        // Persistência local (último ticket)
+        try {
+          localStorage.setItem("facil_last_ticket", JSON.stringify(ticket));
+        } catch {}
+
+        applyTicketToUI(ticket);
+      }
+
+      // Start
+      document.addEventListener("DOMContentLoaded", init);
+    })();
+  </script>
+</body>
+</html>

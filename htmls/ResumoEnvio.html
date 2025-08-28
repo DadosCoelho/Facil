@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facil — Resumo e Envio</title>
+  <meta name="description" content="Revise os números e cotas da sua aposta e conclua o envio. Plataforma Facil." />
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --bg-elev: #111217;
+      --card: #14161d;
+      --card-2: #191c24;
+      --text: #e6e8ef;
+      --muted: #98a1b3;
+      --brand: #6ee7b7;
+      --brand-2: #34d399;
+      --ok: #4ade80;
+      --warn: #fbbf24;
+      --err: #f87171;
+      --border: #2a2f3a;
+      --input: #1b1f29;
+      --shadow: 0 10px 30px rgba(0,0,0,0.45);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --radius-xs: 8px;
+      --maxw: 1120px;
+      --accent: #60a5fa;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f7fb;
+        --bg-elev: #ffffff;
+        --card: #ffffff;
+        --card-2: #fafbff;
+        --text: #0f172a;
+        --muted: #475569;
+        --brand: #0ea5e9;
+        --brand-2: #0284c7;
+        --ok: #16a34a;
+        --warn: #d97706;
+        --err: #dc2626;
+        --border: #e2e8f0;
+        --input: #ffffff;
+        --shadow: 0 10px 25px rgba(2, 6, 23, 0.08);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 0% 0%, rgba(96,165,250,0.08), transparent 40%) no-repeat,
+                  radial-gradient(1000px 700px at 100% 100%, rgba(110,231,183,0.07), transparent 45%) no-repeat,
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+
+    header.nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
+      backdrop-filter: blur(8px);
+      padding: 12px 8px;
+      z-index: 20;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+    }
+    .brand .logo {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--brand), var(--accent));
+      box-shadow: 0 8px 20px rgba(52, 211, 153, 0.25);
+    }
+    .brand .title {
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      font-size: 20px;
+    }
+    .brand .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: -2px;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn, button, input[type="submit"] {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      color: var(--text);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform .08s ease, border-color .2s ease, background .2s ease, opacity .2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: var(--brand); }
+    .btn:active { transform: translateY(0); }
+    .btn.primary {
+      background: linear-gradient(180deg, var(--brand), var(--brand-2));
+      color: #0b1324;
+      border-color: transparent;
+      font-weight: 700;
+    }
+    .btn.ghost {
+      background: transparent;
+      border-color: var(--border);
+    }
+    .btn[disabled], .btn[aria-busy="true"] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    main {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+    }
+    @media (max-width: 980px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+    .card p.lead {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .section {
+      display: grid;
+      gap: 14px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      background: var(--bg-elev);
+    }
+    .row .k { color: var(--muted); font-size: 13px; }
+    .row .v { font-weight: 700; }
+
+    .chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      background: var(--bg-elev);
+      padding: 12px; border-radius: 10px; border: 1px dashed var(--border);
+    }
+    .chip {
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      font-weight: 700;
+      min-width: 40px; text-align: center;
+    }
+
+    .price {
+      display: grid; gap: 8px;
+    }
+    .price .line {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .price .line strong { color: var(--text); }
+    .price .total {
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      font-size: 18px;
+      display: flex; justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .alert {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: grid; gap: 6px;
+      background: var(--bg-elev);
+    }
+    .alert.ok { border-color: rgba(74,222,128,0.5); }
+    .alert.warn { border-color: rgba(251,191,36,0.5); }
+    .alert.err { border-color: rgba(248,113,113,0.6); }
+    .alert .title { font-weight: 800; }
+    .alert .msg { color: var(--muted); }
+
+    .grid-2 {
+      display: grid; gap: 12px; grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 620px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .divider {
+      height: 1px; background: var(--border); border: 0; margin: 10px 0;
+    }
+    .actions {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      align-items: center; justify-content: flex-end;
+    }
+
+    .check {
+      display: flex; gap: 8px; align-items: flex-start;
+      font-size: 14px;
+    }
+    .check input { margin-top: 2px; width: 18px; height: 18px; }
+
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .skeleton.line { height: 14px; }
+    .skeleton.box { height: 44px; }
+
+    footer.ft {
+      margin-top: 32px;
+      color: var(--muted);
+      font-size: 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      flex-wrap: wrap;
+    }
+    code.inline {
+      padding: 2px 6px; border-radius: 6px; background: var(--bg-elev); border: 1px solid var(--border);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <div style="padding:12px;margin:12px;border:1px solid #e11;border-radius:8px;background:#fff0f0;color:#b00">
+      Este aplicativo requer JavaScript para funcionar corretamente.
+    </div>
+  </noscript>
+  <div class="wrap">
+    <header class="nav" aria-label="Cabeçalho">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <div class="title">Facil</div>
+          <div class="subtitle">Resumo e Envio</div>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <a id="helpLink" class="btn ghost" href="#"  rel="noopener">Ajuda</a>
+        <button id="copyLink" class="btn ghost" type="button">Copiar link</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="section">
+        <div class="card">
+          <h2>Convite</h2>
+          <p class="lead">Verifique o status do seu convite antes de concluir o envio.</p>
+          <div id="inviteAlert" class="alert warn" role="status" aria-live="polite">
+            <div class="title">Validando convite…</div>
+            <div class="msg small">Aguarde enquanto conferimos a validade do seu link de acesso.</div>
+          </div>
+          <div class="grid-2" style="margin-top:10px">
+            <div class="row">
+              <div class="k small">ID do Convite</div>
+              <div class="v" id="inviteId">—</div>
+            </div>
+            <div class="row">
+              <div class="k small">Status</div>
+              <div class="v" id="inviteStatus">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Sua Aposta</h2>
+          <p class="lead">Confira os números e a quantidade de cotas selecionadas.</p>
+
+          <div class="row">
+            <div class="k">Campanha</div>
+            <div class="v" id="campaignName">—</div>
+          </div>
+
+          <div class="row" style="align-items:flex-start">
+            <div>
+              <div class="k">Números escolhidos</div>
+              <div class="small muted">Entre 15 e 20 números, de 1 a 25, sem repetição.</div>
+            </div>
+            <div class="v"><span id="numbersCount">0</span> selecionados</div>
+          </div>
+
+          <div id="numbersChips" class="chips" aria-live="polite" aria-label="Números selecionados">
+            <div class="skeleton box" style="width:100%"></div>
+          </div>
+
+          <div class="grid-2">
+            <div class="row">
+              <div class="k">Cotas</div>
+              <div class="v" id="quotas">—</div>
+            </div>
+            <div class="row">
+              <div class="k">Preço por cota</div>
+              <div class="v" id="pricePerQuota">—</div>
+            </div>
+          </div>
+
+          <div class="price" style="margin-top:8px">
+            <div class="line"><span>Subtotal</span><strong id="subtotal">—</strong></div>
+            <div class="line"><span>Taxas</span><strong id="fees">—</strong></div>
+            <div class="total"><span>Total</span><strong id="total">—</strong></div>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="check">
+            <input type="checkbox" id="accept" />
+            <label for="accept">Declaro que revisei os números, a quantidade de cotas e concordo com os termos da campanha.</label>
+          </div>
+
+          <div class="actions">
+            <a id="backLink" class="btn ghost" href="#">Editar seleção</a>
+            <button id="submitBtn" class="btn primary" type="button" aria-busy="false">Confirmar e Enviar</button>
+          </div>
+
+          <p class="small muted" style="margin-top:6px">
+            Ao enviar, sua aposta será registrada e um recibo/protocolo será exibido. Os dados são armazenados em uma planilha do Google para auditoria.
+          </p>
+        </div>
+
+        <div class="card" id="resultCard" hidden>
+          <h2>Recibo</h2>
+          <p class="lead">Aposta registrada com sucesso. Guarde o protocolo abaixo.</p>
+
+          <div class="row">
+            <div class="k">Protocolo</div>
+            <div class="v" id="ticketId">—</div>
+          </div>
+          <div class="row">
+            <div class="k">Data e hora</div>
+            <div class="v" id="issuedAt">—</div>
+          </div>
+
+          <div class="actions" style="margin-top:8px">
+            <button id="copyTicket" class="btn" type="button">Copiar protocolo</button>
+            <button id="newBet" class="btn ghost" type="button">Fazer outra aposta</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="section">
+        <div class="card">
+          <h2>Observações</h2>
+          <p class="lead">Antes de concluir, verifique as regras principais.</p>
+          <ul class="small muted" style="margin:0 0 8px 18px; display:grid; gap:6px">
+            <li>Mínimo de 15 números, máximo de 20 (1 a 25, sem repetição).</li>
+            <li>Cotas entre 1 e 50 por aposta.</li>
+            <li>Valores exibidos são por cota; total é cotas × preço por cota.</li>
+            <li>Convites são pessoais e intransferíveis.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>Auditoria Técnica</h2>
+          <div class="grid-2">
+            <div class="row">
+              <div class="k small">Rascunho</div>
+              <div class="v small" id="draftId">—</div>
+            </div>
+            <div class="row">
+              <div class="k small">Navegador</div>
+              <div class="v small" id="ua">—</div>
+            </div>
+          </div>
+          <details style="margin-top:10px">
+            <summary class="small">Ver JSON a enviar</summary>
+            <pre id="payloadPreview" class="small" style="white-space:pre-wrap; background:var(--bg-elev); padding:10px; border-radius:10px; border:1px solid var(--border);"></pre>
+          </details>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="ft">
+      <div>Facil — Lotofácil da Independência</div>
+      <div>Suporte: <a id="footerSupport" href="#"  rel="noopener">Central de Ajuda</a></div>
+    </footer>
+  </div>
+
+  <script>
+    (function() {
+      "use strict";
+
+      // Configurações coerentes com as telas anteriores
+      const CONFIG = {
+        campaignName: "Lotofácil da Independência",
+        minNumbers: 15,
+        maxNumbers: 20,
+        numberRange: 25,
+        minQuotas: 1,
+        maxQuotas: 50,
+        pricePerQuota: 10.00, // BRL
+        fees: 0.00, // Sem taxa adicional por padrão
+        currency: "BRL",
+        locale: "pt-BR",
+        supportUrl: "/ajuda",
+        routes: {
+          create: "/criacao.html", // Ajuste para a rota real da tela 2
+          validateInvite: "/api/invites/validate",
+          submitBet: "/api/bets/create"
+        },
+        storage: {
+          invite: "facil.invite",
+          draft: "facil.draft"
+        }
+      };
+
+      // Utilidades
+      const fmt = (v) => new Intl.NumberFormat(CONFIG.locale, { style: "currency", currency: CONFIG.currency, minimumFractionDigits: 2 }).format(v);
+      const $ = (sel) => document.querySelector(sel);
+
+      const $inviteAlert = $("#inviteAlert");
+      const $inviteId = $("#inviteId");
+      const $inviteStatus = $("#inviteStatus");
+      const $campaignName = $("#campaignName");
+      const $numbersChips = $("#numbersChips");
+      const $numbersCount = $("#numbersCount");
+      const $quotas = $("#quotas");
+      const $pricePerQuota = $("#pricePerQuota");
+      const $subtotal = $("#subtotal");
+      const $fees = $("#fees");
+      const $total = $("#total");
+      const $accept = $("#accept");
+      const $submitBtn = $("#submitBtn");
+      const $copyLink = $("#copyLink");
+      const $helpLink = $("#helpLink");
+      const $footerSupport = $("#footerSupport");
+      const $backLink = $("#backLink");
+      const $resultCard = $("#resultCard");
+      const $ticketId = $("#ticketId");
+      const $issuedAt = $("#issuedAt");
+      const $copyTicket = $("#copyTicket");
+      const $newBet = $("#newBet");
+      const $draftId = $("#draftId");
+      const $ua = $("#ua");
+      const $payloadPreview = $("#payloadPreview");
+
+      function getParams() {
+        try {
+          return new URLSearchParams(window.location.search);
+        } catch (e) {
+          return new URLSearchParams("");
+        }
+      }
+
+      function readDraft() {
+        // Procura em localStorage a estrutura salva na tela de criação
+        // Estrutura esperada: { id, invite, numbers: number[], quotas: number, updatedAt }
+        const raw = localStorage.getItem(CONFIG.storage.draft) || localStorage.getItem("facilDraft");
+        if (!raw) return null;
+        try {
+          const obj = JSON.parse(raw);
+          if (!obj || typeof obj !== "object") return null;
+          return obj;
+        } catch {
+          return null;
+        }
+      }
+
+      function readInviteFromAny() {
+        const p = getParams();
+        const fromUrl = p.get("invite");
+        if (fromUrl) return fromUrl;
+        const fromLS = localStorage.getItem(CONFIG.storage.invite) || localStorage.getItem("facilInvite");
+        return fromLS || null;
+      }
+
+      function validateNumbers(nums) {
+        if (!Array.isArray(nums)) return false;
+        const u = new Set(nums);
+        if (u.size !== nums.length) return false;
+        if (nums.length < CONFIG.minNumbers || nums.length > CONFIG.maxNumbers) return false;
+        for (const n of nums) {
+          if (!Number.isInteger(n) || n < 1 || n > CONFIG.numberRange) return false;
+        }
+        return true;
+      }
+
+      function computeTotals(quotas) {
+        const subtotal = quotas * CONFIG.pricePerQuota;
+        const fees = CONFIG.fees;
+        const total = subtotal + fees;
+        return { subtotal, fees, total };
+      }
+
+      function numbersToChips(nums) {
+        $numbersChips.innerHTML = "";
+        nums.slice().sort((a,b) => a - b).forEach(n => {
+          const el = document.createElement("div");
+          el.className = "chip";
+          el.textContent = n.toString().padStart(2, "0");
+          $numbersChips.appendChild(el);
+        });
+      }
+
+      function setInviteUIStatus(type, title, msg) {
+        $inviteAlert.classList.remove("ok", "warn", "err");
+        $inviteAlert.classList.add(type);
+        $inviteAlert.querySelector(".title").textContent = title;
+        $inviteAlert.querySelector(".msg").textContent = msg;
+      }
+
+      async function validateInvite(invite) {
+        if (!invite) {
+          setInviteUIStatus("err", "Convite ausente", "Não encontramos o parâmetro do convite. Volte ao link recebido ou solicite um novo ao administrador.");
+          $inviteId.textContent = "—";
+          $inviteStatus.textContent = "Inválido";
+          return { ok: false };
+        }
+        try {
+          const res = await fetch(`${CONFIG.routes.validateInvite}?invite=${encodeURIComponent(invite)}`, { credentials: "omit" });
+          if (!res.ok) throw new Error("Erro de validação");
+          const data = await res.json();
+          // Esperado: { ok: boolean, invite: { id, status, ownerName? } }
+          const status = (data.invite?.status || (data.ok ? "válido" : "inválido")).toString();
+          $inviteId.textContent = data.invite?.id || invite;
+          $inviteStatus.textContent = status;
+          if (data.ok) {
+            setInviteUIStatus("ok", "Convite válido", "Seu convite foi validado. Você pode concluir o envio da aposta.");
+          } else {
+            setInviteUIStatus("err", "Convite inválido", "O convite informado não é válido. Solicite um novo ao administrador.");
+          }
+          return { ok: !!data.ok, data };
+        } catch (e) {
+          setInviteUIStatus("warn", "Falha ao validar", "Não foi possível validar seu convite agora. Você ainda pode tentar enviar, mas recomendamos tentar novamente em instantes.");
+          $inviteId.textContent = invite;
+          $inviteStatus.textContent = "Indefinido";
+          return { ok: true, degraded: true };
+        }
+      }
+
+      function buildPayload(draft, invite) {
+        const now = new Date();
+        const ticketId = "FAC-" + Math.random().toString(36).slice(2, 6).toUpperCase() + "-" + now.getTime().toString().slice(-6);
+        const totals = computeTotals(draft.quotas);
+        return {
+          ticketId,
+          campaign: CONFIG.campaignName,
+          invite,
+          draftId: draft.id || null,
+          numbers: draft.numbers.slice().sort((a,b) => a - b),
+          quotas: draft.quotas,
+          pricePerQuota: CONFIG.pricePerQuota,
+          subtotal: totals.subtotal,
+          fees: totals.fees,
+          total: totals.total,
+          client: {
+            ua: navigator.userAgent || "",
+            lang: navigator.language || "pt-BR"
+          },
+          createdAt: now.toISOString()
+        };
+      }
+
+      async function submit(payload) {
+        const res = await fetch(CONFIG.routes.submitBet, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(text || "Falha ao enviar aposta");
+        }
+        // Esperado: { ok: true, id: "..." } (id da planilha/linha ou algo semelhante)
+        const data = await res.json().catch(() => ({}));
+        return data;
+      }
+
+      function init() {
+        // Links de suporte/cópia
+        $helpLink.href = CONFIG.supportUrl || "#";
+        $("#footerSupport").href = CONFIG.supportUrl || "#";
+
+        // Preenche campanha
+        $campaignName.textContent = CONFIG.campaignName;
+
+        // Read invite and draft
+        const invite = readInviteFromAny();
+        const draft = readDraft();
+
+        // Persist invite in LS para continuidade
+        if (invite) localStorage.setItem(CONFIG.storage.invite, invite);
+
+        // Back link (editar)
+        const backUrl = new URL(window.location.origin + (CONFIG.routes.create || "/"));
+        if (invite) backUrl.searchParams.set("invite", invite);
+        $("#backLink").href = backUrl.toString();
+
+        // Cabeçalho
+        $inviteId.textContent = invite || "—";
+
+        // UA e draftId
+        $ua.textContent = navigator.userAgent;
+        $draftId.textContent = (draft && (draft.id || draft.updatedAt || "rascunho")) || "—";
+
+        // Draft inexistente
+        if (!draft) {
+          numbersToChips([]);
+          $numbersCount.textContent = "0";
+          $quotas.textContent = "—";
+          $pricePerQuota.textContent = fmt(CONFIG.pricePerQuota);
+          $subtotal.textContent = "—";
+          $fees.textContent = "—";
+          $total.textContent = "—";
+          setInviteUIStatus("err", "Rascunho não encontrado", "Volte e selecione seus números e cotas antes de enviar.");
+          $submitBtn.disabled = true;
+          return validateInvite(invite);
+        }
+
+        // Valida seleção
+        const validNums = validateNumbers(draft.numbers);
+        const validQuotas = Number.isInteger(draft.quotas) && draft.quotas >= CONFIG.minQuotas && draft.quotas <= CONFIG.maxQuotas;
+
+        if (!validNums || !validQuotas) {
+          numbersToChips(Array.isArray(draft.numbers) ? draft.numbers : []);
+          $numbersCount.textContent = Array.isArray(draft.numbers) ? String(draft.numbers.length) : "0";
+          $quotas.textContent = validQuotas ? String(draft.quotas) : "—";
+          $pricePerQuota.textContent = fmt(CONFIG.pricePerQuota);
+          $subtotal.textContent = "—";
+          $fees.textContent = "—";
+          $total.textContent = "—";
+          setInviteUIStatus("err", "Dados inválidos", "Sua seleção não atende aos critérios. Clique em Editar seleção para corrigir.");
+          $submitBtn.disabled = true;
+          return validateInvite(invite);
+        }
+
+        // Preenche UI
+        numbersToChips(draft.numbers);
+        $numbersCount.textContent = String(draft.numbers.length);
+        $quotas.textContent = String(draft.quotas);
+        $pricePerQuota.textContent = fmt(CONFIG.pricePerQuota);
+
+        const totals = computeTotals(draft.quotas);
+        $subtotal.textContent = fmt(totals.subtotal);
+        $fees.textContent = fmt(totals.fees);
+        $total.textContent = fmt(totals.total);
+
+        // Payload preview
+        const payload = buildPayload(draft, invite);
+        $payloadPreview.textContent = JSON.stringify(payload, null, 2);
+
+        // Validação de convite (assíncrona)
+        validateInvite(invite);
+
+        // Ações
+        $copyLink.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(window.location.href);
+            $copyLink.textContent = "Link copiado!";
+            setTimeout(() => ($copyLink.textContent = "Copiar link"), 1800);
+          } catch {
+            alert("Não foi possível copiar o link.");
+          }
+        });
+
+        $submitBtn.addEventListener("click", async () => {
+          if (!$accept.checked) {
+            alert("Para continuar, marque que você revisou e concorda com os termos da campanha.");
+            return;
+          }
+          $submitBtn.setAttribute("aria-busy", "true");
+          $submitBtn.disabled = true;
+
+          const freshDraft = readDraft() || draft; // re-lê por segurança
+          const finalPayload = buildPayload(freshDraft, invite);
+          $payloadPreview.textContent = JSON.stringify(finalPayload, null, 2);
+
+          try {
+            const res = await submit(finalPayload);
+            const sheetId = res?.id || finalPayload.ticketId;
+
+            // Exibe recibo
+            $ticketId.textContent = sheetId;
+            const issuedAt = new Date(finalPayload.createdAt);
+            $issuedAt.textContent = issuedAt.toLocaleString(CONFIG.locale);
+            $resultCard.hidden = false;
+
+            // Limpa somente o rascunho (mantém o invite para novas apostas)
+            try { localStorage.removeItem(CONFIG.storage.draft); } catch {}
+            // Scroll até o recibo
+            $resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+          } catch (e) {
+            alert("Não foi possível enviar a aposta agora. Tente novamente em alguns instantes.");
+          } finally {
+            $submitBtn.removeAttribute("aria-busy");
+            $submitBtn.disabled = false;
+          }
+        });
+
+        $copyTicket.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText($ticketId.textContent || "");
+            $copyTicket.textContent = "Protocolo copiado!";
+            setTimeout(() => ($copyTicket.textContent = "Copiar protocolo"), 1600);
+          } catch {
+            alert("Falha ao copiar o protocolo.");
+          }
+        });
+
+        $newBet.addEventListener("click", () => {
+          const url = new URL(window.location.origin + (CONFIG.routes.create || "/"));
+          if (invite) url.searchParams.set("invite", invite);
+          window.location.href = url.toString();
+        });
+      }
+
+      // Inicia
+      init();
+    })();
+  </script>
+</body>
+</html>

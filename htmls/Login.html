@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facil — Login / Admin Gate</title>
+  <meta name="description" content="Acesse a área administrativa da Facil. Login por link mágico (e-mail) ou por chave de acesso. Layout responsivo e acessível." />
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --bg-elev: #111217;
+      --card: #14161d;
+      --card-2: #191c24;
+      --text: #e6e8ef;
+      --muted: #98a1b2;
+      --primary: #18a0fb;
+      --primary-600: #0e8ad8;
+      --primary-700: #0b6fae;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #232837;
+      --ring: rgba(24,160,251,0.45);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --radius-xs: 8px;
+      --maxw: 1080px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f7f8fb;
+        --bg-elev: #ffffff;
+        --card: #ffffff;
+        --card-2: #fafafa;
+        --text: #0f172a;
+        --muted: #475569;
+        --border: #e5e7eb;
+        --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      background: radial-gradient(1200px 700px at 10% -10%, rgba(24,160,251,0.15), transparent 60%),
+                  radial-gradient(900px 600px at 110% 10%, rgba(34,197,94,0.12), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      margin: 0;
+      line-height: 1.45;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: saturate(120%) blur(8px);
+      background: color-mix(in oklab, var(--bg-elev) 86%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .brand .logo {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), #22c55e);
+      color: white;
+      font-weight: 800;
+      box-shadow: 0 6px 20px rgba(24,160,251,0.3);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 92%, transparent);
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px;
+      font-weight: 600;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, color-mix(in oklab, var(--card) 92%, transparent), color-mix(in oklab, var(--card-2) 95%, transparent));
+      color: var(--text);
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: transform .08s ease, box-shadow .15s ease, background .2s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn.primary {
+      background: linear-gradient(180deg, var(--primary), var(--primary-600));
+      border-color: color-mix(in oklab, var(--primary) 70%, black 10%);
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(24,160,251,0.35);
+    }
+    .btn.ghost { background: transparent; }
+    .btn.icon { padding: 10px; width: 40px; height: 40px; }
+    .container {
+      max-width: var(--maxw);
+      margin: 32px auto;
+      padding: 0 18px 32px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .card {
+      background: linear-gradient(180deg, color-mix(in oklab, var(--card) 100%, transparent), color-mix(in oklab, var(--card-2) 92%, transparent));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: clip;
+    }
+    .card .hd {
+      padding: 18px 18px 0 18px;
+      display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px;
+    }
+    .title {
+      font-size: 20px; font-weight: 800; letter-spacing: .2px;
+    }
+    .subtitle { color: var(--muted); font-size: 14px; }
+    .card .bd { padding: 18px; }
+    .card .ft {
+      padding: 16px 18px;
+      border-top: 1px solid var(--border);
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    @media (min-width: 920px) {
+      .grid-2 { grid-template-columns: 1.15fr 0.85fr; }
+    }
+    .panel {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      background: color-mix(in oklab, var(--bg-elev) 85%, transparent);
+    }
+    .tabs {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .tab {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 92%, transparent);
+      color: var(--muted);
+      padding: 8px 12px; border-radius: 999px;
+      font-weight: 600; font-size: 13px;
+      cursor: pointer;
+    }
+    .tab[aria-selected="true"] {
+      color: #fff; background: var(--primary);
+      border-color: color-mix(in oklab, var(--primary) 70%, black 10%);
+      box-shadow: 0 6px 15px rgba(24,160,251,0.35);
+    }
+    form { display: grid; gap: 12px; }
+    .field { display: grid; gap: 6px; }
+    .field.inline { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
+    label { font-size: 13px; color: var(--muted); }
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--bg-elev) 92%, transparent);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease, background .2s ease;
+    }
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--ring);
+      background: color-mix(in oklab, var(--bg-elev) 98%, transparent);
+    }
+    .help { color: var(--muted); font-size: 12px; }
+    .alert {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--bg-elev) 90%, transparent);
+      color: var(--text);
+    }
+    .alert.show { display: flex; gap: 10px; align-items: center; }
+    .alert.success { border-color: color-mix(in oklab, var(--success) 60%, var(--border)); background: color-mix(in oklab, #073b22 70%, transparent); }
+    .alert.warn { border-color: color-mix(in oklab, var(--warning) 60%, var(--border)); background: color-mix(in oklab, #4a3a06 70%, transparent); }
+    .alert.danger { border-color: color-mix(in oklab, var(--danger) 60%, var(--border)); background: color-mix(in oklab, #3f0b0b 70%, transparent); }
+    .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .spacer { flex: 1 1 auto; }
+    .otp {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .otp input {
+      text-align: center;
+      font-size: 18px;
+      letter-spacing: 2px;
+      padding: 12px 0;
+    }
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+    .skeleton {
+      background: linear-gradient(90deg, color-mix(in oklab, var(--bg-elev) 85%, transparent), color-mix(in oklab, var(--bg-elev) 95%, transparent), color-mix(in oklab, var(--bg-elev) 85%, transparent));
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 10px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .right { text-align: right; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav" role="navigation" aria-label="Cabeçalho principal">
+      <a class="brand" href="/" aria-label="Ir para a página inicial">
+        <span class="logo">F</span>
+        <span>Facil</span>
+      </a>
+      <div class="nav-links">
+        <span id="sessionChip" class="chip" aria-live="polite">Não autenticado</span>
+        <a id="helpLink" class="btn ghost" href="#" rel="noopener"  aria-label="Abrir ajuda">Ajuda</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card" aria-labelledby="loginTitle">
+      <div class="hd">
+        <div class="title" id="loginTitle">Login / Admin Gate</div>
+        <div class="badge"><span>🔐</span><span>Acesso administrativo</span></div>
+        <span class="spacer"></span>
+        <div class="subtitle">Entre com link mágico por e-mail ou com chave de acesso.</div>
+      </div>
+      <div class="bd grid-2">
+        <div class="panel" id="leftPanel">
+          <div class="tabs" role="tablist" aria-label="Modos de login">
+            <button class="tab" id="tab-magic" role="tab" aria-selected="true" aria-controls="panel-magic">Link mágico (e-mail)</button>
+            <button class="tab" id="tab-code" role="tab" aria-selected="false" aria-controls="panel-code">Chave / Código</button>
+          </div>
+
+          <!-- Painel: Link Mágico -->
+          <section id="panel-magic" role="tabpanel" aria-labelledby="tab-magic">
+            <form id="formMagic" novalidate>
+              <div class="field">
+                <label for="email">E-mail de acesso</label>
+                <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
+                  placeholder="seunome@empresa.com" required aria-describedby="emailHelp emailErr" />
+                <div id="emailHelp" class="help">Enviaremos um link de acesso válido por 10 minutos.</div>
+                <div id="emailErr" class="help" style="color: var(--danger); display: none;">Informe um e-mail válido.</div>
+              </div>
+
+              <div class="row">
+                <button id="btnSendMagic" type="submit" class="btn primary">Enviar link</button>
+                <button id="btnPasteToken" type="button" class="btn" title="Colar token da área de transferência">Colar token</button>
+                <span class="spacer"></span>
+                <label class="row small muted" style="gap:6px">
+                  <input id="remember" type="checkbox" />
+                  Lembrar meu e-mail neste dispositivo
+                </label>
+              </div>
+
+              <div id="magicAlert" class="alert" role="alert" aria-live="assertive"></div>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="small muted">
+              Já recebeu o link? Basta abrir o e-mail no mesmo dispositivo e clicar. Você também pode colar manualmente o token acima.
+            </div>
+          </section>
+
+          <!-- Painel: Chave / Código -->
+          <section id="panel-code" role="tabpanel" aria-labelledby="tab-code" class="hidden">
+            <form id="formCode" novalidate>
+              <div class="field">
+                <label for="adminId">ID (e-mail administrativo)</label>
+                <input id="adminId" name="adminId" type="email" inputmode="email" autocomplete="email"
+                  placeholder="admin@facil.app" required aria-describedby="adminIdHelp adminIdErr" />
+                <div id="adminIdHelp" class="help">Identificação do administrador autorizada.</div>
+                <div id="adminIdErr" class="help" style="color: var(--danger); display: none;">Informe um e-mail válido.</div>
+              </div>
+
+              <div class="field">
+                <label for="secret">Chave de acesso</label>
+                <div class="row" style="gap:8px">
+                  <input id="secret" name="secret" type="password" autocomplete="current-password"
+                    placeholder="••••••••••" required aria-describedby="secretHelp" />
+                  <button type="button" id="toggleSecret" class="btn icon" aria-label="Mostrar ou ocultar chave">👁️</button>
+                </div>
+                <div id="secretHelp" class="help">Chave temporária ou senha administrativa definida pelo responsável.</div>
+              </div>
+
+              <div class="field">
+                <label>Código de 2º fator (OTP)</label>
+                <div class="otp" role="group" aria-label="Código de verificação de 6 dígitos">
+                  <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" aria-label="Dígito 1" />
+                  <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" aria-label="Dígito 2" />
+                  <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" aria-label="Dígito 3" />
+                  <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" aria-label="Dígito 4" />
+                  <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" aria-label="Dígito 5" />
+                  <input inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" aria-label="Dígito 6" />
+                </div>
+                <div class="help">Se não utilizar 2FA, deixe em branco.</div>
+              </div>
+
+              <div class="row">
+                <button id="btnLogin" type="submit" class="btn primary">Entrar</button>
+                <button id="btnForgot" type="button" class="btn">Esqueci minha chave</button>
+                <span class="spacer"></span>
+                <button id="btnClear" type="button" class="btn ghost">Limpar</button>
+              </div>
+
+              <div id="codeAlert" class="alert" role="alert" aria-live="assertive"></div>
+            </form>
+          </section>
+        </div>
+
+        <!-- Painel lateral de estado/ajuda -->
+        <aside class="panel" id="rightPanel" aria-live="polite">
+          <div class="row">
+            <div class="badge">Estado da sessão</div>
+            <span class="spacer"></span>
+            <button id="btnLogout" class="btn ghost hidden">Sair</button>
+          </div>
+
+          <div id="sessionState" style="margin-top:12px">
+            <div class="row" style="gap:10px">
+              <div class="skeleton" style="width:40px; height:40px"></div>
+              <div class="skeleton" style="width:70%; height:14px"></div>
+            </div>
+            <div class="skeleton" style="margin-top:12px; width:100%; height:64px"></div>
+          </div>
+
+          <div id="sessionInfo" class="hidden">
+            <div class="row" style="align-items:flex-start">
+              <div style="width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background:linear-gradient(135deg, var(--primary), #22c55e); color:#fff; font-weight:800;">A</div>
+              <div>
+                <div id="who" style="font-weight:700">—</div>
+                <div id="role" class="small muted">—</div>
+              </div>
+              <span class="spacer"></span>
+              <a id="goAdmin" class="btn primary" href="#">Ir para Admin</a>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="small muted">
+              Este é um protótipo. Em produção, tokens devem expirar rapidamente e ser armazenados com segurança no servidor.
+            </div>
+          </div>
+        </aside>
+      </div>
+      <div class="ft">
+        <div class="small muted">Ao entrar, você concorda com os Termos de Uso e nossa política de privacidade.</div>
+        <div class="row">
+          <a id="linkHome" class="btn ghost" href="/">Voltar</a>
+          <a id="linkSupport" class="btn" href="#"  rel="noopener">Suporte</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Aviso de token nos parâmetros -->
+    <section id="tokenAlert" class="alert success hidden" role="status" aria-live="assertive">
+      <div>Token encontrado no link. Validando…</div>
+    </section>
+
+    <noscript>
+      <section class="card" style="margin-top:12px; border-color:#ef4444">
+        <div class="bd">
+          Habilite o JavaScript para realizar o login. Sem ele, não é possível validar o link mágico nem a chave de acesso.
+        </div>
+      </section>
+    </noscript>
+  </main>
+
+  <script>
+    (function() {
+      "use strict";
+
+      // Configuração central
+      const CONFIG = {
+        routes: {
+          admin: "/admin",
+          home: "/",
+        },
+        endpoints: {
+          authRequestMagic: "/api/auth/magic/request",      // POST { email }
+          authValidateToken: "/api/auth/magic/validate",     // POST { token }
+          authLoginPassword: "/api/auth/login",              // POST { adminId, secret, otp? }
+          authForgot: "/api/auth/forgot",                    // POST { adminId }
+        },
+        supportUrl: "https://example.com/suporte",
+        tokenStorageKey: "facil_admin_token",
+        tokenTTLms: 1000 * 60 * 30, // 30 minutos
+      };
+
+      // Utilidades
+      const $ = (sel, el = document) => el.querySelector(sel);
+      const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
+
+      function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+      function setBusy(el, busy = true) {
+        if (!el) return;
+        el.setAttribute("aria-busy", busy ? "true" : "false");
+        const btns = el.querySelectorAll("button, [type=submit]");
+        btns.forEach(b => b.disabled = !!busy);
+      }
+      function safeJson(res) { return res.text().then(t => t ? JSON.parse(t) : {}); }
+
+      // Session helpers
+      function saveToken(payload) {
+        try {
+          const data = {
+            ...payload,
+            savedAt: Date.now(),
+            exp: Date.now() + CONFIG.tokenTTLms
+          };
+          localStorage.setItem(CONFIG.tokenStorageKey, JSON.stringify(data));
+          updateSessionUI();
+        } catch {}
+      }
+      function loadToken() {
+        try {
+          const raw = localStorage.getItem(CONFIG.tokenStorageKey);
+          if (!raw) return null;
+          const data = JSON.parse(raw);
+          if (!data || !data.exp || Date.now() > data.exp) {
+            localStorage.removeItem(CONFIG.tokenStorageKey);
+            return null;
+          }
+          return data;
+        } catch { return null; }
+      }
+      function clearToken() {
+        try { localStorage.removeItem(CONFIG.tokenStorageKey); } catch {}
+        updateSessionUI();
+      }
+
+      // UI Alert helpers
+      function showAlert(el, kind, msg) {
+        if (!el) return;
+        el.className = "alert show " + (kind || "");
+        el.textContent = msg;
+      }
+      function hideAlert(el) {
+        if (!el) return;
+        el.className = "alert";
+        el.textContent = "";
+      }
+
+      // Tabs
+      function switchTab(which) {
+        const tabMagic = $("#tab-magic");
+        const tabCode = $("#tab-code");
+        const pMagic = $("#panel-magic");
+        const pCode = $("#panel-code");
+        if (which === "magic") {
+          tabMagic.setAttribute("aria-selected", "true");
+          tabCode.setAttribute("aria-selected", "false");
+          pMagic.classList.remove("hidden");
+          pCode.classList.add("hidden");
+        } else {
+          tabMagic.setAttribute("aria-selected", "false");
+          tabCode.setAttribute("aria-selected", "true");
+          pMagic.classList.add("hidden");
+          pCode.classList.remove("hidden");
+        }
+      }
+
+      // OTP helpers
+      function getOtp() {
+        return $$(".otp-digit").map(i => i.value.trim()).join("");
+      }
+      function clearOtp() {
+        $$(".otp-digit").forEach(i => i.value = "");
+        const first = $(".otp-digit");
+        if (first) first.focus();
+      }
+      function bindOtp() {
+        const digits = $$(".otp-digit");
+        digits.forEach((inp, idx) => {
+          inp.addEventListener("keydown", e => {
+            if (e.key === "Backspace" && !inp.value && idx > 0) {
+              digits[idx - 1].focus();
+              digits[idx - 1].value = "";
+              e.preventDefault();
+            }
+          });
+          inp.addEventListener("input", () => {
+            inp.value = inp.value.replace(/\D/g, "").slice(0, 1);
+            if (inp.value && idx < digits.length - 1) digits[idx + 1].focus();
+          });
+          inp.addEventListener("paste", e => {
+            const txt = (e.clipboardData || window.clipboardData).getData("text");
+            if (txt && /^\d{6}$/.test(txt.trim())) {
+              e.preventDefault();
+              txt.trim().split("").forEach((d, i) => { if (digits[i]) digits[i].value = d; });
+              const last = digits[digits.length - 1];
+              if (last) last.focus();
+            }
+          });
+        });
+      }
+
+      // Email validator
+      function validEmail(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v || "");
+      }
+
+      // Session UI
+      function updateSessionUI() {
+        const chip = $("#sessionChip");
+        const rightState = $("#sessionState");
+        const info = $("#sessionInfo");
+        const btnLogout = $("#btnLogout");
+        const goAdmin = $("#goAdmin");
+        const who = $("#who");
+        const role = $("#role");
+
+        const token = loadToken();
+        if (token) {
+          chip.textContent = "Admin: " + (token.email || token.adminId || "Sessão ativa");
+          rightState.classList.add("hidden");
+          info.classList.remove("hidden");
+          btnLogout.classList.remove("hidden");
+          who.textContent = token.email || token.adminId || "Administrador";
+          role.textContent = (token.role || "admin") + " • expira em " + Math.max(1, Math.round((token.exp - Date.now()) / 60000)) + " min";
+          goAdmin.href = CONFIG.routes.admin || "/admin";
+        } else {
+          chip.textContent = "Não autenticado";
+          rightState.classList.remove("hidden");
+          info.classList.add("hidden");
+          btnLogout.classList.add("hidden");
+          who.textContent = "—";
+          role.textContent = "—";
+        }
+      }
+
+      // Bind UI events
+      function bindEvents() {
+        // Tabs
+        $("#tab-magic").addEventListener("click", () => switchTab("magic"));
+        $("#tab-code").addEventListener("click", () => switchTab("code"));
+
+        // Magic link form
+        const formMagic = $("#formMagic");
+        const email = $("#email");
+        const emailErr = $("#emailErr");
+        const remember = $("#remember");
+        const magicAlert = $("#magicAlert");
+
+        email.addEventListener("input", () => {
+          if (!email.value) { emailErr.style.display = "none"; return; }
+          emailErr.style.display = validEmail(email.value) ? "none" : "block";
+        });
+
+        formMagic.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          hideAlert(magicAlert);
+          if (!validEmail(email.value)) {
+            emailErr.style.display = "block";
+            email.focus();
+            return;
+          }
+          setBusy(formMagic, true);
+          try {
+            const res = await fetch(CONFIG.endpoints.authRequestMagic, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: email.value })
+            });
+            const data = await safeJson(res);
+            if (!res.ok) throw new Error(data?.message || "Falha ao solicitar link de acesso.");
+            if (remember.checked) {
+              try { localStorage.setItem("facil_admin_email", email.value); } catch {}
+            }
+            showAlert(magicAlert, "success", "Enviamos um link para " + email.value + ". Verifique sua caixa de entrada e spam.");
+          } catch (err) {
+            showAlert(magicAlert, "danger", err.message || "Não foi possível enviar o link. Tente novamente.");
+          } finally {
+            setBusy(formMagic, false);
+          }
+        });
+
+        $("#btnPasteToken").addEventListener("click", async () => {
+          hideAlert(magicAlert);
+          try {
+            const txt = await navigator.clipboard.readText();
+            if (!txt || txt.length < 16) throw new Error("Nenhum token válido na área de transferência.");
+            await validateTokenFlow(txt.trim(), magicAlert);
+          } catch (err) {
+            showAlert(magicAlert, "warn", err.message || "Não foi possível ler o token.");
+          }
+        });
+
+        // Load remembered email
+        try {
+          const savedEmail = localStorage.getItem("facil_admin_email");
+          if (savedEmail) {
+            email.value = savedEmail;
+            remember.checked = true;
+          }
+        } catch {}
+
+        // Code form
+        const formCode = $("#formCode");
+        const adminId = $("#adminId");
+        const adminIdErr = $("#adminIdErr");
+        const secret = $("#secret");
+        const codeAlert = $("#codeAlert");
+
+        adminId.addEventListener("input", () => {
+          if (!adminId.value) { adminIdErr.style.display = "none"; return; }
+          adminIdErr.style.display = validEmail(adminId.value) ? "none" : "block";
+        });
+
+        $("#toggleSecret").addEventListener("click", () => {
+          const type = secret.getAttribute("type") === "password" ? "text" : "password";
+          secret.setAttribute("type", type);
+        });
+
+        $("#btnForgot").addEventListener("click", async () => {
+          hideAlert(codeAlert);
+          if (!validEmail(adminId.value)) {
+            adminIdErr.style.display = "block";
+            adminId.focus();
+            return;
+          }
+          setBusy(formCode, true);
+          try {
+            const res = await fetch(CONFIG.endpoints.authForgot, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ adminId: adminId.value })
+            });
+            const data = await safeJson(res);
+            if (!res.ok) throw new Error(data?.message || "Não foi possível iniciar a recuperação.");
+            showAlert(codeAlert, "success", "Enviamos instruções para " + adminId.value + ".");
+          } catch (err) {
+            showAlert(codeAlert, "danger", err.message || "Falha ao iniciar recuperação.");
+          } finally {
+            setBusy(formCode, false);
+          }
+        });
+
+        $("#btnClear").addEventListener("click", () => {
+          adminId.value = "";
+          secret.value = "";
+          clearOtp();
+          hideAlert(codeAlert);
+          adminIdErr.style.display = "none";
+        });
+
+        formCode.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          hideAlert(codeAlert);
+          if (!validEmail(adminId.value)) {
+            adminIdErr.style.display = "block";
+            adminId.focus();
+            return;
+          }
+          const otp = getOtp();
+          setBusy(formCode, true);
+          try {
+            const res = await fetch(CONFIG.endpoints.authLoginPassword, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ adminId: adminId.value, secret: secret.value, otp: otp || undefined })
+            });
+            const data = await safeJson(res);
+            if (!res.ok) throw new Error(data?.message || "Credenciais inválidas.");
+            // Espera-se que o backend retorne token, role e (opcional) nome/email
+            saveToken({ token: data.token, role: data.role || "admin", email: data.email || adminId.value });
+            showAlert(codeAlert, "success", "Login realizado. Redirecionando…");
+            await sleep(900);
+            window.location.href = CONFIG.routes.admin || "/admin";
+          } catch (err) {
+            showAlert(codeAlert, "danger", err.message || "Erro ao entrar.");
+          } finally {
+            setBusy(formCode, false);
+          }
+        });
+
+        // Logout
+        $("#btnLogout").addEventListener("click", () => {
+          clearToken();
+        });
+
+        // Header/help links
+        const help = $("#helpLink");
+        if (help) help.href = CONFIG.supportUrl || "#";
+        const linkSupport = $("#linkSupport");
+        if (linkSupport) linkSupport.href = CONFIG.supportUrl || "#";
+        const linkHome = $("#linkHome");
+        if (linkHome && CONFIG.routes.home) linkHome.href = CONFIG.routes.home;
+
+        bindOtp();
+      }
+
+      // Token from URL flow
+      async function validateTokenFlow(tokenValue, alertEl) {
+        try {
+          showAlert(alertEl, "success", "Validando token…");
+          const res = await fetch(CONFIG.endpoints.authValidateToken, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: tokenValue })
+          });
+          const data = await safeJson(res);
+          if (!res.ok) throw new Error(data?.message || "Token inválido ou expirado.");
+          // Sucesso: salvar sessão e redirecionar
+          saveToken({ token: data.token || tokenValue, role: data.role || "admin", email: data.email });
+          showAlert(alertEl, "success", "Tudo certo! Redirecionando para a área administrativa…");
+          await sleep(1000);
+          window.location.href = CONFIG.routes.admin || "/admin";
+        } catch (err) {
+          showAlert(alertEl, "danger", err.message || "Falha ao validar token.");
+        }
+      }
+
+      async function init() {
+        // Inicial UI
+        updateSessionUI();
+        bindEvents();
+
+        // Token via query param
+        const params = new URLSearchParams(location.search);
+        const urlToken = params.get("token");
+        const tokenAlert = $("#tokenAlert");
+
+        if (urlToken) {
+          tokenAlert.classList.remove("hidden");
+          try {
+            await validateTokenFlow(urlToken, tokenAlert);
+          } finally {
+            // Oculta após algum tempo
+            setTimeout(() => tokenAlert.classList.add("hidden"), 4000);
+          }
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", init);
+    })();
+  </script>
+</body>
+</html>

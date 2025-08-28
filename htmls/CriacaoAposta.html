@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facil — Criação de Aposta</title>
+  <meta name="description" content="Crie sua aposta da Lotofácil da Independência: selecione números e defina a quantidade de cotas. Plataforma Facil." />
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --bg-elev: #111217;
+      --card: #14161d;
+      --card-2: #191c24;
+      --muted: #9aa3b2;
+      --text: #e6ebf2;
+      --title: #f6f7fb;
+      --border: #262b36;
+      --primary: #00e676;
+      --primary-2: #02c46a;
+      --danger: #ff5c5c;
+      --warning: #ffc857;
+      --focus: #89d5ff;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --radius-lg: 18px;
+      --gap: 16px;
+      --gap-lg: 24px;
+      --container: 1140px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 100% -20%, rgba(0,230,118,0.07), transparent 50%) no-repeat,
+                  linear-gradient(180deg, var(--bg), var(--bg-elev));
+      line-height: 1.45;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header.site {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: saturate(1.2) blur(8px);
+      background: rgba(15,16,22,0.7);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--title);
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      font-size: 1.05rem;
+    }
+    .brand .logo {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: conic-gradient(from 140deg, #00e676, #05b36a, #0aa37b, #00e676);
+      display: inline-block;
+      box-shadow: 0 6px 14px rgba(0,230,118,0.35), inset 0 0 1px rgba(255,255,255,0.2);
+    }
+    .nav-actions {
+      display: inline-flex; align-items: center; gap: 10px;
+    }
+    .link {
+      color: var(--muted); text-decoration: none; font-weight: 600;
+    }
+    .link:hover { color: var(--text); }
+
+    main {
+      padding: 28px 0 40px;
+    }
+
+    .page-title {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-bottom: 16px;
+    }
+    .page-title h1 {
+      font-size: 1.2rem;
+      margin: 0; color: var(--title); letter-spacing: 0.2px;
+    }
+    .subtitle {
+      color: var(--muted); font-size: 0.95rem; margin-top: 6px;
+    }
+
+    .layout {
+      display: grid; gap: 20px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 900px) {
+      .layout {
+        grid-template-columns: 1.3fr 1fr;
+        align-items: start;
+      }
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 1.05rem; color: var(--title);
+    }
+    .section {
+      border-top: 1px dashed var(--border);
+      margin-top: 14px; padding-top: 14px;
+    }
+    .row { display: grid; gap: 12px; }
+    .row-2 { display: grid; gap: 12px; grid-template-columns: 1fr; }
+    @media (min-width: 640px) { .row-2 { grid-template-columns: 1fr 1fr; } }
+
+    .muted { color: var(--muted); font-size: 0.94rem; }
+
+    .field {
+      display: grid; gap: 8px;
+    }
+    .label {
+      font-weight: 600; color: var(--text); font-size: 0.95rem;
+    }
+    .input, .select, .number {
+      width: 100%;
+      background: #0f1117;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .input:focus, .select:focus, .number:focus {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px rgba(137,213,255,0.15);
+    }
+    .help { color: var(--muted); font-size: 0.86rem; }
+
+    .grid-nums {
+      display: grid; gap: 8px;
+      grid-template-columns: repeat(5, 1fr);
+      user-select: none;
+    }
+    @media (min-width: 560px) {
+      .grid-nums { gap: 10px; }
+    }
+    .num {
+      position: relative;
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      padding: 12px 0;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #0f1117;
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .08s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    .num:hover { transform: translateY(-1px); border-color: #2d3340; }
+    .num.selected {
+      background: linear-gradient(180deg, #0e1c16, #0f1f18);
+      border-color: rgba(0,230,118,0.7);
+      box-shadow: 0 6px 16px rgba(0,230,118,0.18), inset 0 0 0 1px rgba(0,230,118,0.35);
+      color: #dffced;
+    }
+    .num .badge {
+      position: absolute; top: 6px; right: 6px;
+      background: var(--primary);
+      color: #002312; font-size: 10px; font-weight: 800;
+      padding: 2px 6px; border-radius: 999px;
+      display: none;
+    }
+    .num.selected .badge { display: inline-block; }
+
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin: 12px 0 8px;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 10px 14px;
+      border-radius: 12px; font-weight: 700; letter-spacing: 0.2px;
+      border: 1px solid var(--border);
+      background: #0f1117; color: var(--text);
+      cursor: pointer; transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: #2d3340; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-primary {
+      background: linear-gradient(180deg, #03e06f, #03c463);
+      color: #072413; border-color: rgba(0,0,0,0.05);
+      box-shadow: 0 6px 16px rgba(0,230,118,0.28), inset 0 0 0 1px rgba(255,255,255,0.2);
+    }
+    .btn-primary:hover { box-shadow: 0 10px 24px rgba(0,230,118,0.35); }
+    .btn-danger { background: #1f1313; color: #ffdede; border-color: #3a2222; }
+    .btn-ghost { background: transparent; border-color: var(--border); }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 999px; border: 1px solid var(--border);
+      color: var(--muted); background: #0f1117; font-weight: 600; font-size: 0.9rem;
+    }
+
+    .stats {
+      display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr);
+    }
+    @media (min-width: 480px) { .stats { grid-template-columns: repeat(3, 1fr); } }
+    .stat {
+      background: #0f1117;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .stat .k { font-weight: 800; color: var(--title); font-size: 1.05rem; }
+    .stat .v { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+
+    .alert {
+      display: grid; grid-template-columns: 20px 1fr; gap: 10px;
+      padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border);
+      background: #10131a;
+    }
+    .alert.ok { border-color: rgba(0,230,118,0.4); background: #0f1713; }
+    .alert.warn { border-color: rgba(255,200,87,0.35); background: #19160e; }
+    .alert.err { border-color: rgba(255,92,92,0.45); background: #1b0f12; }
+    .alert .title { font-weight: 700; color: var(--title); }
+    .alert .msg { color: var(--muted); font-size: 0.92rem; }
+
+    .footer {
+      margin-top: 20px; color: var(--muted); font-size: 0.9rem; text-align: center;
+    }
+
+    .divider {
+      height: 1px; background: var(--border); margin: 12px 0;
+    }
+
+    .right-sticky {
+      position: sticky; top: 86px;
+    }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #0f1117; border: 1px dashed var(--border);
+      padding: 6px 10px; border-radius: 999px; color: var(--muted); font-weight: 700; font-size: 0.85rem;
+    }
+
+    .inline { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .flex { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+    .hidden { display: none !important; }
+    .success {
+      color: #b4ffda; background: #12201a; border-color: rgba(0,230,118,0.4);
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    .loading {
+      display: inline-flex; gap: 8px; align-items: center;
+      color: var(--muted);
+    }
+    .spinner {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid #2b3140; border-top-color: var(--primary);
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .kbd {
+      padding: 2px 6px; border-radius: 6px; border: 1px solid var(--border); background: #0f1117; color: var(--muted); font-size: 0.85rem;
+    }
+
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header class="site">
+    <div class="container nav">
+      <a href="#" class="brand" aria-label="Facil — Início">
+        <span class="logo" aria-hidden="true"></span>
+        <span>Facil</span>
+      </a>
+      <div class="nav-actions">
+        <a id="helpLink" class="link" href="#" rel="noopener">Ajuda</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="page-title">
+        <div>
+          <h1>2) Criação de Aposta</h1>
+          <div class="subtitle">Selecione entre 15 e 20 números (1–25) e defina a quantidade de cotas. Esta aposta será vinculada ao seu convite.</div>
+        </div>
+        <div class="inline">
+          <span class="chip">Campanha: <span class="mono" id="campaignName">—</span></span>
+          <span class="chip">Convite: <span class="mono" id="inviteShort">—</span></span>
+        </div>
+      </div>
+
+      <div id="inviteAlert" class="alert warn">
+        <div>⚠️</div>
+        <div>
+          <div class="title">Validando seu convite…</div>
+          <div class="msg">Aguarde enquanto confirmamos o acesso. Isso leva só alguns segundos.</div>
+        </div>
+      </div>
+
+      <div class="layout section">
+        <!-- Coluna esquerda: Seleção de números -->
+        <section class="card" aria-labelledby="numsTitle">
+          <h2 id="numsTitle">Seleção de números</h2>
+          <div class="muted">Toque/cli­que para selecionar. Você pode escolher entre 15 e 20 números.</div>
+
+          <div class="toolbar">
+            <button class="btn" id="btnSurpresinha" type="button" title="Escolher 15 números aleatórios">🎲 Surpresinha (15)</button>
+            <div class="inline">
+              <span class="pill">Completar até</span>
+              <select class="select" id="targetCount" aria-label="Quantidade alvo" style="width:92px">
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+              </select>
+              <button class="btn" id="btnCompletar" type="button">Completar</button>
+            </div>
+            <button class="btn btn-danger" id="btnLimpar" type="button">Limpar</button>
+          </div>
+
+          <div id="grid" class="grid-nums" role="group" aria-label="Grade de números de 1 a 25"></div>
+
+          <div class="section">
+            <div class="stats">
+              <div class="stat">
+                <div class="k"><span id="count">0</span> números</div>
+                <div class="v">Selecionados</div>
+              </div>
+              <div class="stat">
+                <div class="k"><span id="remaining">15</span> mínimo</div>
+                <div class="v">Restam para atingir 15</div>
+              </div>
+              <div class="stat">
+                <div class="k">1–25</div>
+                <div class="v">Faixa válida</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Coluna direita: Detalhes, cotas e envio -->
+        <aside class="card right-sticky" aria-labelledby="detailsTitle">
+          <h2 id="detailsTitle">Detalhes e envio</h2>
+
+          <div class="row">
+            <div class="field">
+              <label class="label" for="name">Nome (opcional)</label>
+              <input class="input" id="name" name="name" placeholder="Como você quer ser identificado no recibo" autocomplete="name" />
+            </div>
+            <div class="field">
+              <label class="label" for="email">E-mail (opcional)</label>
+              <input class="input" id="email" name="email" placeholder="Para receber confirmação" inputmode="email" autocomplete="email" />
+              <div class="help">Seu e-mail será usado apenas para confirmação desta aposta (se configurado no admin).</div>
+            </div>
+          </div>
+
+          <div class="row-2 section">
+            <div class="field">
+              <label class="label" for="quotas">Quantidade de cotas</label>
+              <input class="number" id="quotas" name="quotas" type="number" min="1" max="999" step="1" value="1" />
+              <div class="help">Cada cota representa uma participação igual no prêmio entre os cotistas.</div>
+            </div>
+            <div class="field">
+              <label class="label" for="notes">Notas (opcional)</label>
+              <input class="input" id="notes" name="notes" placeholder="Ex.: participar com amigos do grupo A" />
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="alert" id="rulesMsg">
+              <div>ℹ️</div>
+              <div>
+                <div class="title">Regras de validação</div>
+                <div class="msg">
+                  • Selecione no mínimo 15 e no máximo 20 números. • Sem repetição. • Convite precisa estar ativo. <br />
+                  • Após enviar, os dados são registrados em uma Planilha do Google pelo administrador.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row">
+            <button id="btnSubmit" class="btn btn-primary" type="button" disabled>Enviar aposta</button>
+            <div id="submitState" class="loading hidden"><span class="spinner"></span> Enviando…</div>
+            <div id="successBox" class="alert ok hidden">
+              <div>✅</div>
+              <div>
+                <div class="title">Aposta registrada!</div>
+                <div class="msg">ID: <span id="betId" class="mono">—</span></div>
+                <div class="flex" style="margin-top:8px">
+                  <button id="btnNova" class="btn">Fazer outra aposta</button>
+                  <button id="btnCopiarId" class="btn btn-ghost">Copiar ID</button>
+                </div>
+              </div>
+            </div>
+            <div id="errorBox" class="alert err hidden">
+              <div>⛔</div>
+              <div>
+                <div class="title">Não foi possível enviar</div>
+                <div id="errMsg" class="msg">Tente novamente em alguns instantes.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="inline">
+              <span class="pill">Status do convite: <strong id="inviteStatus">—</strong></span>
+              <span class="pill">Janela: <span id="campaignWindow">—</span></span>
+            </div>
+          </div>
+
+        </aside>
+      </div>
+
+      <div class="footer">
+        Dica: use <span class="kbd">Surpresinha</span> para preencher automaticamente 15 números, ou <span class="kbd">Completar</span> para atingir o alvo desejado.
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // Configuração (ajuste a URL base da API no deploy real)
+      const CONFIG = {
+        apiBase: "",
+        supportUrl: "mailto:suporte@suaorganizacao.com",
+        min: 15,
+        max: 20,
+        totalNumbers: 25
+      };
+
+      const qs = new URLSearchParams(location.search);
+      const state = {
+        inviteId: qs.get("invite") || qs.get("t") || "",
+        campaignId: qs.get("campaign") || qs.get("c") || "LF-Independencia",
+        campaignName: "Loto Fácil da Independência",
+        inviteValid: false,
+        inviteStatus: "verificando",
+        window: { open: "—", close: "—", isOpen: true },
+        selected: new Set(),
+        target: 15,
+        quotas: 1,
+        submitting: false,
+        betId: null
+      };
+
+      // Elements
+      const $grid = document.getElementById("grid");
+      const $count = document.getElementById("count");
+      const $remaining = document.getElementById("remaining");
+      const $btnSurpresinha = document.getElementById("btnSurpresinha");
+      const $btnCompletar = document.getElementById("btnCompletar");
+      const $btnLimpar = document.getElementById("btnLimpar");
+      const $targetCount = document.getElementById("targetCount");
+      const $quotas = document.getElementById("quotas");
+      const $name = document.getElementById("name");
+      const $email = document.getElementById("email");
+      const $notes = document.getElementById("notes");
+      const $btnSubmit = document.getElementById("btnSubmit");
+      const $submitState = document.getElementById("submitState");
+      const $successBox = document.getElementById("successBox");
+      const $betId = document.getElementById("betId");
+      const $btnNova = document.getElementById("btnNova");
+      const $btnCopiarId = document.getElementById("btnCopiarId");
+      const $errorBox = document.getElementById("errorBox");
+      const $errMsg = document.getElementById("errMsg");
+      const $inviteAlert = document.getElementById("inviteAlert");
+      const $inviteShort = document.getElementById("inviteShort");
+      const $campaignName = document.getElementById("campaignName");
+      const $helpLink = document.getElementById("helpLink");
+      const $inviteStatus = document.getElementById("inviteStatus");
+      const $campaignWindow = document.getElementById("campaignWindow");
+
+      // Prefill from query
+      const nameQS = qs.get("name");
+      const emailQS = qs.get("email");
+      if (nameQS) $name.value = nameQS;
+      if (emailQS) $email.value = emailQS;
+
+      function shortId(str) {
+        if (!str) return "—";
+        if (str.length <= 10) return str;
+        return str.slice(0, 4) + "…" + str.slice(-4);
+      }
+
+      function buildGrid() {
+        const frag = document.createDocumentFragment();
+        for (let n = 1; n <= CONFIG.totalNumbers; n++) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "num";
+          btn.setAttribute("data-n", String(n));
+          btn.setAttribute("aria-pressed", "false");
+          btn.setAttribute("aria-label", "Número " + n);
+          btn.innerHTML = '<span>' + n + '</span><span class="badge"></span>';
+          frag.appendChild(btn);
+        }
+        $grid.appendChild(frag);
+      }
+
+      function updateGridUI() {
+        const nodes = $grid.querySelectorAll(".num");
+        const arr = [...state.selected];
+        const order = new Map();
+        arr.forEach((n, idx) => order.set(n, idx + 1));
+
+        nodes.forEach(node => {
+          const n = Number(node.getAttribute("data-n"));
+          const isSel = state.selected.has(n);
+          node.classList.toggle("selected", isSel);
+          node.setAttribute("aria-pressed", isSel ? "true" : "false");
+          const badge = node.querySelector(".badge");
+          if (badge) badge.textContent = isSel ? order.get(n) : "";
+        });
+
+        $count.textContent = String(state.selected.size);
+        const need = Math.max(0, CONFIG.min - state.selected.size);
+        $remaining.textContent = need > 0 ? String(need) : "OK";
+        const canSubmit = isValidSelection() && isValidInvite() && Number($quotas.value || "0") >= 1;
+        $btnSubmit.disabled = !canSubmit || state.submitting;
+
+        // Status chip
+        $inviteStatus.textContent = state.inviteStatus === "ok" ? "ativo" :
+                                    state.inviteStatus === "verificando" ? "verificando" : "inválido";
+      }
+
+      function isValidSelection() {
+        const c = state.selected.size;
+        return c >= CONFIG.min && c <= CONFIG.max;
+      }
+
+      function isValidInvite() {
+        return state.inviteValid === true && state.inviteStatus === "ok" && state.window.isOpen === true;
+      }
+
+      function toggleNumber(n) {
+        if (state.selected.has(n)) {
+          state.selected.delete(n);
+        } else {
+          if (state.selected.size >= CONFIG.max) {
+            // não excede o máximo
+            return;
+          }
+          state.selected.add(n);
+        }
+        updateGridUI();
+      }
+
+      function randomPick(k, universe) {
+        const result = new Set();
+        while (result.size < k) {
+          const r = universe[Math.floor(Math.random() * universe.length)];
+          result.add(r);
+        }
+        return [...result].sort((a,b) => a - b);
+      }
+
+      function surpresinha15() {
+        state.selected.clear();
+        const picks = randomPick(15, Array.from({length: CONFIG.totalNumbers}, (_, i) => i + 1));
+        picks.forEach(n => state.selected.add(n));
+        updateGridUI();
+      }
+
+      function completarAte(target) {
+        target = Math.max(CONFIG.min, Math.min(CONFIG.max, Number(target || CONFIG.min)));
+        state.target = target;
+        if (state.selected.size >= target) return;
+        const universe = [];
+        for (let i = 1; i <= CONFIG.totalNumbers; i++) {
+          if (!state.selected.has(i)) universe.push(i);
+        }
+        const need = target - state.selected.size;
+        const add = randomPick(need, universe);
+        add.forEach(n => state.selected.add(n));
+        updateGridUI();
+      }
+
+      function clearAll() {
+        state.selected.clear();
+        updateGridUI();
+      }
+
+      function persistDraft() {
+        const draft = {
+          selected: [...state.selected],
+          quotas: Number($quotas.value || "1"),
+          name: $name.value || "",
+          email: $email.value || "",
+          notes: $notes.value || "",
+          inviteId: state.inviteId,
+          campaignId: state.campaignId
+        };
+        localStorage.setItem("facil:draft", JSON.stringify(draft));
+      }
+
+      function restoreDraft() {
+        try {
+          const raw = localStorage.getItem("facil:draft");
+          if (!raw) return;
+          const d = JSON.parse(raw);
+          if (d.inviteId !== state.inviteId || d.campaignId !== state.campaignId) return;
+          state.selected = new Set((d.selected || []).filter(n => Number.isInteger(n) && n >= 1 && n <= CONFIG.totalNumbers));
+          if (d.quotas) $quotas.value = String(Math.max(1, Math.min(999, Number(d.quotas))));
+          if (d.name) $name.value = d.name;
+          if (d.email) $email.value = d.email;
+          if (d.notes) $notes.value = d.notes;
+        } catch {}
+      }
+
+      async function validateInvite() {
+        $inviteAlert.classList.remove("hidden");
+        $inviteAlert.classList.remove("ok", "err", "warn");
+        $inviteAlert.classList.add("warn");
+        $inviteAlert.querySelector(".title").textContent = "Validando seu convite…";
+        $inviteAlert.querySelector(".msg").textContent = "Aguarde enquanto confirmamos o acesso.";
+
+        // Endpoint sugerido pelo plano (/api/invites/validate?token=...)
+        const url = (CONFIG.apiBase || "") + "/api/invites/validate?token=" + encodeURIComponent(state.inviteId) + "&campaign=" + encodeURIComponent(state.campaignId);
+
+        try {
+          const res = await fetch(url, { method: "GET" });
+          if (!res.ok) throw new Error("convite inválido");
+          const data = await res.json();
+          // Espera-se: { ok: boolean, invite: { status: "ok"|"revoked"|"expired", owner?: string }, campaign: { name, openAt, closeAt, open: boolean } }
+          state.inviteValid = data.ok === true && data.invite?.status === "ok";
+          state.inviteStatus = data.invite?.status === "ok" ? "ok" : "invalido";
+          state.campaignName = data.campaign?.name || state.campaignName;
+          state.window = {
+            open: data.campaign?.openAt || "—",
+            close: data.campaign?.closeAt || "—",
+            isOpen: data.campaign?.open === true
+          };
+
+          $campaignName.textContent = state.campaignName;
+          $campaignWindow.textContent = (state.window.open && state.window.close) ? (state.window.open + " → " + state.window.close) : "—";
+
+          if (isValidInvite()) {
+            $inviteAlert.classList.remove("warn");
+            $inviteAlert.classList.add("ok");
+            $inviteAlert.querySelector(".title").textContent = "Convite validado";
+            $inviteAlert.querySelector(".msg").textContent = "Você pode prosseguir e enviar sua aposta.";
+          } else {
+            $inviteAlert.classList.remove("warn");
+            $inviteAlert.classList.add("err");
+            $inviteAlert.querySelector(".title").textContent = "Convite inválido ou campanha fechada";
+            $inviteAlert.querySelector(".msg").textContent = "Se você acredita que isso é um engano, contate o administrador pelo link Ajuda.";
+          }
+        } catch (e) {
+          state.inviteValid = false;
+          state.inviteStatus = "invalido";
+          $inviteAlert.classList.remove("warn");
+          $inviteAlert.classList.add("err");
+          $inviteAlert.querySelector(".title").textContent = "Não foi possível validar o convite";
+          $inviteAlert.querySelector(".msg").textContent = "Você ainda pode montar sua aposta, mas o envio ficará bloqueado até validar.";
+        } finally {
+          updateGridUI();
+        }
+      }
+
+      function formPayload() {
+        const numbers = [...state.selected].sort((a,b) => a - b);
+        return {
+          inviteId: state.inviteId,
+          campaignId: state.campaignId,
+          participant: {
+            name: $name.value?.trim() || null,
+            email: ($email.value?.trim() || "").toLowerCase() || null
+          },
+          bet: {
+            numbers,
+            quotas: Math.max(1, Math.min(999, Number($quotas.value || "1"))),
+            notes: $notes.value?.trim() || null
+          },
+          metadata: {
+            userAgent: navigator.userAgent,
+            createdAt: new Date().toISOString(),
+            locale: navigator.language || "pt-BR",
+            referer: document.referrer || null,
+          }
+        };
+      }
+
+      async function submitBet() {
+        if (!isValidSelection()) {
+          showError("Selecione entre " + CONFIG.min + " e " + CONFIG.max + " números para enviar.");
+          return;
+        }
+        if (!isValidInvite()) {
+          showError("Convite inválido ou campanha fechada. Verifique com o administrador.");
+          return;
+        }
+        const quotas = Number($quotas.value || "0");
+        if (!(quotas >= 1 && quotas <= 999)) {
+          showError("Informe uma quantidade de cotas válida (1 a 999).");
+          return;
+        }
+
+        $errorBox.classList.add("hidden");
+        state.submitting = true;
+        $btnSubmit.disabled = true;
+        $submitState.classList.remove("hidden");
+
+        const url = (CONFIG.apiBase || "") + "/api/apostas";
+        const payload = formPayload();
+
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            const msg = data?.error || "Falha ao registrar aposta. Tente novamente.";
+            throw new Error(msg);
+          }
+
+          // Sucesso
+          state.betId = data?.id || data?.betId || null;
+          $betId.textContent = state.betId ? String(state.betId) : "registrada";
+          $successBox.classList.remove("hidden");
+          $btnSubmit.classList.add("hidden");
+
+          // Persistência local
+          try {
+            localStorage.setItem("facil:lastBet", JSON.stringify({ id: state.betId, at: Date.now(), payload }));
+          } catch {}
+
+          // Focus
+          $successBox.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        } catch (e) {
+          showError(e?.message || "Não foi possível enviar agora.");
+        } finally {
+          state.submitting = false;
+          $submitState.classList.add("hidden");
+          updateGridUI();
+        }
+      }
+
+      function showError(message) {
+        $errMsg.textContent = message;
+        $errorBox.classList.remove("hidden");
+        $errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      // Event wiring
+      function bindEvents() {
+        $grid.addEventListener("click", (ev) => {
+          const btn = ev.target.closest(".num");
+          if (!btn) return;
+          const n = Number(btn.getAttribute("data-n"));
+          if (!Number.isInteger(n)) return;
+          toggleNumber(n);
+          persistDraft();
+        });
+
+        $btnSurpresinha.addEventListener("click", () => {
+          surpresinha15();
+          persistDraft();
+        });
+
+        $btnCompletar.addEventListener("click", () => {
+          completarAte($targetCount.value);
+          persistDraft();
+        });
+
+        $targetCount.addEventListener("change", () => {
+          state.target = Number($targetCount.value || CONFIG.min);
+        });
+
+        $btnLimpar.addEventListener("click", () => {
+          clearAll();
+          persistDraft();
+        });
+
+        $quotas.addEventListener("input", () => {
+          const v = Math.max(1, Math.min(999, Number($quotas.value || "1")));
+          $quotas.value = String(v);
+          state.quotas = v;
+          persistDraft();
+          updateGridUI();
+        });
+
+        [$name, $email, $notes].forEach(($el) => {
+          $el.addEventListener("input", persistDraft);
+        });
+
+        $btnSubmit.addEventListener("click", submitBet);
+
+        $btnNova.addEventListener("click", () => {
+          // Reset para nova aposta (mantendo convite)
+          clearAll();
+          $successBox.classList.add("hidden");
+          $btnSubmit.classList.remove("hidden");
+          state.betId = null;
+          $notes.value = "";
+          $quotas.value = "1";
+          $errorBox.classList.add("hidden");
+          updateGridUI();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        $btnCopiarId.addEventListener("click", async () => {
+          try {
+            const id = $betId.textContent.trim();
+            await navigator.clipboard.writeText(id);
+            $btnCopiarId.textContent = "Copiado!";
+            setTimeout(() => ($btnCopiarId.textContent = "Copiar ID"), 1800);
+          } catch {}
+        });
+
+        window.addEventListener("beforeunload", persistDraft);
+      }
+
+      // Init
+      (function init() {
+        // Header links
+        if ($helpLink) $helpLink.href = CONFIG.supportUrl || "#";
+
+        // Identificação visual
+        $inviteShort.textContent = shortId(state.inviteId);
+        $campaignName.textContent = state.campaignName;
+
+        // Monta grid
+        buildGrid();
+
+        // Restaura rascunho
+        restoreDraft();
+
+        // Se o convite veio ausente, mantém aviso
+        if (!state.inviteId) {
+          state.inviteValid = false;
+          state.inviteStatus = "invalido";
+          $inviteAlert.classList.remove("warn");
+          $inviteAlert.classList.add("err");
+          $inviteAlert.querySelector(".title").textContent = "Convite não encontrado";
+          $inviteAlert.querySelector(".msg").textContent = "A URL de acesso deve conter um parâmetro de convite. Solicite um novo link ao administrador.";
+        } else {
+          // Valida convite remotamente
+          validateInvite();
+        }
+
+        // Atualiza UI inicial
+        updateGridUI();
+
+        // Liga eventos
+        bindEvents();
+      })();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facil — Termos e Privacidade</title>
+  <meta name="description" content="Termos de Uso, Política de Privacidade e Preferências de Cookies da Facil. Leia, pesquise, exporte e gerencie consentimentos de forma transparente." />
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --bg-elev:#111217;
+      --bg-soft:#14161c;
+      --border:#1c1f29;
+      --muted:#2a2f3a;
+      --text:#e7ebf3;
+      --text-muted:#aab3c5;
+      --primary:#4f46e5;
+      --primary-600:#4338ca;
+      --accent:#22d3ee;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --err:#ef4444;
+      --shadow:0 2px 10px rgba(0,0,0,.35);
+      --radius:14px;
+      --radius-sm:10px;
+      --radius-xs:8px;
+      --focus:0 0 0 3px rgba(79,70,229,.35);
+      --chip-ok:linear-gradient(135deg, #10b981 0%, #22c55e 100%);
+      --chip-warn:linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+      --chip-neutral:linear-gradient(135deg, #334155 0%, #475569 100%);
+    }
+    [data-theme="light"]{
+      --bg:#f7f8fb;
+      --bg-elev:#ffffff;
+      --bg-soft:#f0f2f7;
+      --border:#d8dee9;
+      --muted:#cbd5e1;
+      --text:#0b172a;
+      --text-muted:#475569;
+      --primary:#4338ca;
+      --primary-600:#3730a3;
+      --accent:#0891b2;
+      --shadow:0 2px 12px rgba(0,0,0,.08);
+      --focus:0 0 0 3px rgba(67,56,202,.25);
+      --chip-neutral:linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    }
+
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font:400 16px/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    a{ color:var(--accent); text-decoration:none }
+    a:hover{ text-decoration:underline }
+    h1,h2,h3{ margin:0 0 .4rem 0; line-height:1.2 }
+    h1{ font-size:1.8rem }
+    h2{ font-size:1.35rem; margin-top:1.25rem }
+    h3{ font-size:1.05rem; margin-top:.85rem }
+    p{ margin:.5rem 0 }
+
+    /* Layout */
+    header.appbar{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter:saturate(1.2) blur(8px);
+      background:color-mix(in oklab, var(--bg), transparent 20%);
+      border-bottom:1px solid var(--border);
+    }
+    .appbar__inner{
+      max-width:1200px; margin:0 auto; padding:.75rem 1rem;
+      display:flex; align-items:center; gap:.75rem; justify-content:space-between;
+    }
+    .brand{
+      display:flex; align-items:center; gap:.6rem;
+    }
+    .brand .logo{
+      width:34px; height:34px; border-radius:10px;
+      display:grid; place-items:center;
+      background:linear-gradient(135deg, var(--primary), var(--accent));
+      color:white; font-weight:700; box-shadow:var(--shadow);
+    }
+    .brand .name{
+      font-weight:700; letter-spacing:.3px;
+    }
+    .tools{ display:flex; align-items:center; gap:.5rem }
+    .chip{
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.35rem .6rem; border-radius:999px; font-size:.78rem;
+      background:var(--chip-neutral); color:#0b172a;
+      border:1px solid color-mix(in oklab, var(--border), transparent 70%);
+    }
+    .chip small{ opacity:.85 }
+
+    .btn{
+      appearance:none; border:1px solid var(--border); color:var(--text);
+      background:var(--bg-elev); padding:.6rem .8rem; border-radius:10px;
+      cursor:pointer; display:inline-flex; align-items:center; gap:.5rem;
+      box-shadow:var(--shadow); transition:.18s ease;
+    }
+    .btn:hover{ transform:translateY(-1px); border-color:var(--muted) }
+    .btn:focus-visible{ outline:none; box-shadow:var(--focus) }
+    .btn.primary{ background:var(--primary); border-color:var(--primary-600); color:white }
+    .btn.ghost{ background:transparent }
+    .btn.icon{ padding:.5rem; width:38px; height:38px; justify-content:center }
+
+    .container{
+      max-width:1200px; margin:1rem auto; padding:0 1rem;
+      display:grid; grid-template-columns:260px 1fr; gap:1rem;
+    }
+
+    aside.nav{
+      position:sticky; top:72px; align-self:start;
+      background:var(--bg-elev); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .nav__head{ padding:1rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:.5rem }
+    .nav__list{ list-style:none; margin:0; padding:.4rem }
+    .nav__list a{
+      display:flex; align-items:center; gap:.6rem; padding:.55rem .75rem; border-radius:8px; color:var(--text);
+    }
+    .nav__list a:hover{ background:var(--bg-soft) }
+    .nav__list a.active{ background:linear-gradient(135deg, color-mix(in oklab, var(--primary), transparent 80%), transparent); border:1px dashed var(--primary-600) }
+
+    main.content{
+      display:flex; flex-direction:column; gap:1rem;
+    }
+    .card{
+      background:var(--bg-elev); border:1px solid var(--border);
+      border-radius:var(--radius); box-shadow:var(--shadow);
+    }
+    .card__body{ padding:1rem }
+    .headerband{
+      display:flex; flex-wrap:wrap; gap:.75rem; align-items:center; justify-content:space-between;
+      padding:1rem; border-bottom:1px solid var(--border);
+    }
+    .titlewrap{ display:flex; flex-direction:column; gap:.25rem }
+    .titlewrap p{ color:var(--text-muted); margin:0 }
+    .statusline{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap }
+    .badge{
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.35rem .6rem; border-radius:999px; font-size:.78rem; border:1px solid var(--border);
+      background:var(--bg-soft); color:var(--text);
+    }
+    .badge.ok{ background:var(--chip-ok); color:white; border-color:transparent }
+    .badge.warn{ background:var(--chip-warn); color:#0b172a; border-color:transparent }
+
+    .actions{ display:flex; flex-wrap:wrap; gap:.5rem }
+    .actions .sep{ width:1px; height:30px; background:var(--border); margin:0 .25rem }
+
+    .toolbar{
+      display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between;
+      padding:.75rem 1rem; border-bottom:1px dashed var(--border); background:var(--bg-soft);
+      border-radius:var(--radius) var(--radius) 0 0;
+    }
+    .toolbar .search{ display:flex; align-items:center; gap:.5rem; flex:1 }
+    .toolbar input[type="search"]{
+      flex:1; min-width:180px; padding:.6rem .75rem; border-radius:10px;
+      border:1px solid var(--border); background:var(--bg-elev); color:var(--text);
+    }
+
+    .toc{
+      display:grid; gap:.35rem; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .toc a{
+      padding:.6rem .75rem; border-radius:10px; background:var(--bg-soft);
+      border:1px dashed var(--border); color:var(--text);
+    }
+    .toc a:hover{ background:color-mix(in oklab, var(--bg-soft), var(--accent) 8%) }
+
+    .section{
+      padding:1rem; border-top:1px dashed var(--border);
+    }
+    .muted{ color:var(--text-muted) }
+    .note{
+      padding:.75rem .85rem; border:1px dashed var(--border); border-radius:10px;
+      background:linear-gradient(180deg, color-mix(in oklab, var(--bg-soft), transparent 10%), transparent);
+      color:var(--text-muted)
+    }
+    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:1rem }
+    .grid-3{ display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem }
+    .list{ padding-left:1.15rem; margin:.4rem 0 }
+    .list li{ margin:.25rem 0 }
+
+    .switch{
+      display:inline-flex; align-items:center; gap:.5rem; cursor:pointer;
+      user-select:none;
+    }
+    .switch input{ display:none }
+    .switch .track{
+      width:44px; height:24px; border-radius:999px; background:var(--muted); position:relative; border:1px solid var(--border);
+      transition:.2s;
+    }
+    .switch .thumb{
+      position:absolute; top:50%; transform:translateY(-50%);
+      left:3px; width:18px; height:18px; border-radius:999px; background:var(--bg-elev);
+      transition:.2s; box-shadow:var(--shadow);
+    }
+    .switch input:checked + .track{ background:var(--primary) }
+    .switch input:checked + .track .thumb{ left:23px; background:white }
+
+    .kv{ display:flex; justify-content:space-between; gap:1rem; padding:.5rem .6rem; border:1px dashed var(--border); border-radius:8px; background:var(--bg-soft) }
+    .kv strong{ font-weight:600 }
+    .pill{
+      display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .5rem; border-radius:999px; background:var(--bg-soft); border:1px solid var(--border); font-size:.75rem
+    }
+
+    .footer{
+      padding:1rem; color:var(--text-muted); border-top:1px solid var(--border); text-align:center
+    }
+
+    .hidden{ display:none !important }
+
+    /* Toast */
+    .toast{
+      position:fixed; bottom:18px; right:18px; z-index:60; min-width:240px;
+      background:var(--bg-elev); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow);
+      padding:.8rem .9rem; display:flex; gap:.6rem; align-items:flex-start;
+    }
+    .toast.ok{ border-left:6px solid var(--ok) }
+    .toast.warn{ border-left:6px solid var(--warn) }
+    .toast.err{ border-left:6px solid var(--err) }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:80; display:grid; place-items:center; padding:1rem;
+      animation:fadeIn .15s ease-out;
+    }
+    @keyframes fadeIn{ from{ opacity:0 } to{ opacity:1 } }
+    .modal{
+      width:min(680px, 100%); background:var(--bg-elev); border:1px solid var(--border);
+      border-radius:14px; box-shadow:var(--shadow); overflow:hidden;
+    }
+    .modal .m-head{ padding:1rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between }
+    .modal .m-body{ padding:1rem; display:grid; gap:.75rem }
+    .modal .m-foot{ padding:1rem; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:.5rem }
+    .modal input, .modal select, .modal textarea{
+      width:100%; padding:.65rem .75rem; border-radius:10px; border:1px solid var(--border); background:var(--bg-soft); color:var(--text);
+    }
+    .modal textarea{ min-height:120px; resize:vertical }
+
+    /* Print */
+    @media print{
+      header.appbar, aside.nav, .toolbar, .actions, .toast, .footer{ display:none !important }
+      .container{ display:block; max-width:auto; margin:0; padding:0 }
+      main.content{ padding:0 }
+      .card{ border:none; border-radius:0; box-shadow:none }
+      .section{ border:none }
+      a{ text-decoration:none; color:inherit }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px){
+      .container{ grid-template-columns:1fr; }
+      aside.nav{ position:static }
+    }
+    @media (max-width: 640px){
+      .appbar__inner{ padding:.6rem .75rem }
+      .tools{ gap:.35rem }
+      .btn{ padding:.55rem .65rem }
+      .grid-2, .grid-3{ grid-template-columns:1fr }
+      .toolbar{ gap:.5rem }
+    }
+  </style>
+</head>
+<body>
+  <header class="appbar">
+    <div class="appbar__inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">F</div>
+        <div class="name">Facil</div>
+        <span class="pill" id="envChip" title="Ambiente">app</span>
+      </div>
+      <div class="tools">
+        <button class="btn icon ghost" id="themeToggle" aria-label="Alternar tema" title="Alternar tema">
+          <span>🌓</span>
+        </button>
+        <button class="btn ghost" id="printBtn" title="Imprimir / Salvar em PDF">
+          <span>🖨️</span><span>Imprimir</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <aside class="nav" aria-label="Navegação principal">
+      <div class="nav__head">
+        <strong>Seções</strong>
+        <button class="btn icon ghost" id="collapseAside" aria-label="Recolher menu">⟨</button>
+      </div>
+      <ul class="nav__list">
+        <li><a href="./resumo-envio.html">3) Resumo e Envio</a></li>
+        <li><a href="./confirmacao-recibo.html">4) Confirmação/Recibo</a></li>
+        <li><a href="./minhas-apostas.html">5) Minhas Apostas</a></li>
+        <li><a href="./login-admin.html">6) Login/Admin Gate</a></li>
+        <li><a href="./dashboard.html">7) Dashboard</a></li>
+        <li><a href="./campanhas.html">8) Campanhas (CRUD)</a></li>
+        <li><a href="./convites.html">9) Convites</a></li>
+        <li><a href="./apostas-admin.html">10) Apostas (Admin)</a></li>
+        <li><a href="./configuracoes.html">11) Configurações</a></li>
+        <li><a href="#" class="active">12) Termos e Privacidade</a></li>
+      </ul>
+    </aside>
+
+    <main class="content" id="main">
+      <section class="card" id="top">
+        <div class="headerband">
+          <div class="titlewrap">
+            <h1>Termos e Privacidade</h1>
+            <p>Transparência sobre como você usa nossa plataforma e como tratamos seus dados.</p>
+            <div class="statusline">
+              <span class="badge" id="versionBadge" title="Versão ativa">Versão: —</span>
+              <span class="badge" id="dateBadge" title="Data de vigência">Vigência: —</span>
+              <span class="badge warn" id="acceptBadge" title="Status de aceite">Aceite: pendente</span>
+            </div>
+          </div>
+          <div class="actions">
+            <label class="pill">
+              Versão
+              <select id="versionSelect" title="Selecionar versão do documento">
+                <!-- dynamic -->
+              </select>
+            </label>
+            <span class="sep"></span>
+            <button class="btn" id="downloadTxt"><span>⬇️</span><span>Baixar TXT</span></button>
+            <button class="btn" id="downloadJson"><span>⬇️</span><span>Baixar JSON</span></button>
+            <button class="btn primary" id="acceptBtn" title="Registrar aceite">Aceito os termos</button>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="search">
+            <input type="search" id="q" placeholder="Pesquisar no documento..." aria-label="Pesquisar" />
+            <button class="btn" id="btnSearch">Buscar</button>
+            <button class="btn ghost" id="btnClear">Limpar</button>
+            <span class="muted" id="searchCount">0 resultados</span>
+          </div>
+          <div class="actions">
+            <button class="btn ghost" id="btnExpand">Expandir tudo</button>
+            <button class="btn ghost" id="btnCollapse">Recolher tudo</button>
+          </div>
+        </div>
+
+        <div class="card__body">
+          <div class="note" id="acceptNotice">
+            Importante: leia atentamente e, se estiver de acordo, registre o seu aceite. Você pode baixar uma cópia para seus registros.
+          </div>
+
+          <div class="section" id="toc">
+            <h2>Resumo e Navegação</h2>
+            <div class="toc">
+              <a href="#termos">1. Termos de Uso</a>
+              <a href="#privacidade">2. Política de Privacidade</a>
+              <a href="#cookies">3. Cookies</a>
+              <a href="#preferencias">4. Preferências de Cookies</a>
+              <a href="#solicitacoes">5. Solicitações de Dados</a>
+              <a href="#versoes">6. Versões e Histórico</a>
+              <a href="#glossario">7. Glossário</a>
+              <a href="#contatos">8. Contatos e Reclamações</a>
+            </div>
+          </div>
+
+          <div class="section" id="resumo">
+            <h2>Resumo em linguagem simples</h2>
+            <div class="grid-3">
+              <div class="kv"><strong>O que coletamos</strong><span class="muted">Dados de conta, uso e cookies</span></div>
+              <div class="kv"><strong>Por que</strong><span class="muted">Operar, melhorar e cumprir obrigações</span></div>
+              <div class="kv"><strong>Seus direitos</strong><span class="muted">Acessar, corrigir, apagar, portar, opor-se</span></div>
+            </div>
+          </div>
+
+          <div class="section" id="termos">
+            <h2>1. Termos de Uso</h2>
+            <h3>1.1. Definições</h3>
+            <p>Este documento regula o uso da plataforma Facil. “Serviço” significa os sites, aplicativos e funcionalidades fornecidos. “Usuário” é a pessoa que cria conta ou utiliza o serviço. “Conteúdo” inclui textos, imagens, dados, relatórios e materiais gerados ou disponibilizados.</p>
+            <h3>1.2. Aceitação</h3>
+            <p>Ao usar o Serviço, você concorda com estes Termos. Se não concordar, não utilize o Serviço.</p>
+            <h3>1.3. Conta e elegibilidade</h3>
+            <ul class="list">
+              <li>Você deve ter capacidade legal e, quando aplicável, idade mínima exigida por lei.</li>
+              <li>Mantenha suas credenciais seguras. Você é responsável por atividades realizadas em sua conta.</li>
+              <li>Informe dados verdadeiros e mantenha-os atualizados.</li>
+            </ul>
+            <h3>1.4. Licença e uso aceitável</h3>
+            <p>Concedemos a você uma licença limitada, não exclusiva e intransferível para usar o Serviço. É proibido:</p>
+            <ul class="list">
+              <li>Violar leis, direitos de terceiros ou nossas políticas;</li>
+              <li>Reverter engenharia, explorar vulnerabilidades ou sobrecarregar a infraestrutura;</li>
+              <li>Enviar conteúdo ilícito, ofensivo, enganoso ou que infrinja propriedade intelectual.</li>
+            </ul>
+            <h3>1.5. Conteúdo do usuário</h3>
+            <p>Você mantém a titularidade sobre seu conteúdo e nos concede licença para hospedagem, processamento e exibição conforme necessário para operar o Serviço. Você declara possuir direitos para utilizá-lo.</p>
+            <h3>1.6. Planos, cobrança e reembolsos</h3>
+            <p>Quando aplicável, taxas, ciclos de cobrança, tributos e políticas de reembolso são informados no momento da contratação. Podemos ajustar preços mediante aviso prévio razoável.</p>
+            <h3>1.7. Suspensão e encerramento</h3>
+            <p>Podemos suspender ou encerrar o acesso em caso de violação destes Termos, risco à segurança, fraude ou por determinação legal. Você pode encerrar a conta a qualquer momento.</p>
+            <h3>1.8. Isenções e limitações</h3>
+            <p>O Serviço é fornecido “no estado em que se encontra”. Na extensão permitida por lei, não garantimos ausência de erros, interrupções ou perda de dados. A responsabilidade total por quaisquer danos diretos será, onde permitido, limitada aos valores pagos nos 12 meses anteriores ao evento.</p>
+            <h3>1.9. Alterações</h3>
+            <p>Podemos atualizar estes Termos. Quando mudanças materiais ocorrerem, informaremos por canais razoáveis. O uso contínuo após a vigência implica concordância.</p>
+            <h3>1.10. Lei aplicável e foro</h3>
+            <p>Aplica-se a legislação brasileira. Fica eleito o foro de seu domicílio para dirimir eventuais controvérsias, salvo disposição legal em sentido diverso.</p>
+          </div>
+
+          <div class="section" id="privacidade">
+            <h2>2. Política de Privacidade</h2>
+            <p class="muted">Esta política descreve como coletamos, usamos, compartilhamos e protegemos dados pessoais, em conformidade com a LGPD e princípios correlatos.</p>
+            <h3>2.1. Dados que coletamos</h3>
+            <ul class="list">
+              <li>Identificação: nome, e-mail, telefone, documentos quando estritamente necessários.</li>
+              <li>Conta e uso: credenciais, registros de acesso, eventos de produto, preferências.</li>
+              <li>Transacionais: pagamentos, faturas, estornos, quando aplicável.</li>
+              <li>Dispositivo e rede: IP, tipo de navegador, identificadores de dispositivo e cookies.</li>
+            </ul>
+            <h3>2.2. Fontes</h3>
+            <p>Coletamos dados diretamente de você, automaticamente pelo uso do Serviço e, quando autorizado, de parceiros e integrações.</p>
+            <h3>2.3. Finalidades</h3>
+            <ul class="list">
+              <li>Prestar e melhorar o Serviço;</li>
+              <li>Atendimento, suporte e comunicação sobre sua conta;</li>
+              <li>Cumprimento de obrigações legais e prevenção a fraudes;</li>
+              <li>Personalização, métricas e segurança.</li>
+            </ul>
+            <h3>2.4. Bases legais</h3>
+            <ul class="list">
+              <li>Execução de contrato e procedimentos preliminares;</li>
+              <li>Cumprimento de obrigação legal ou regulatória;</li>
+              <li>Legítimo interesse, observados seus direitos e liberdades;</li>
+              <li>Consentimento, quando requerido (por exemplo, cookies não essenciais);</li>
+              <li>Exercício regular de direitos e proteção ao crédito quando aplicável.</li>
+            </ul>
+            <h3>2.5. Compartilhamento</h3>
+            <p>Poderemos compartilhar dados com operadores e parceiros que nos auxiliam a fornecer o Serviço, mediante contratos e medidas de segurança. Não vendemos dados pessoais.</p>
+            <h3>2.6. Transferências internacionais</h3>
+            <p>Quando houver, adotamos salvaguardas adequadas, como cláusulas contratuais padrão e práticas recomendadas de segurança.</p>
+            <h3>2.7. Segurança</h3>
+            <p>Aplicamos medidas técnicas e organizacionais proporcionais ao risco. Apesar de nossos esforços, nenhum método é totalmente infalível.</p>
+            <h3>2.8. Retenção</h3>
+            <p>Guardamos dados pelo tempo necessário às finalidades ou conforme exigências legais. Após, eliminamos ou anonimizamos de forma segura.</p>
+            <h3>2.9. Seus direitos</h3>
+            <ul class="list">
+              <li>Confirmação de tratamento e acesso;</li>
+              <li>Correção de dados incompletos, inexatos ou desatualizados;</li>
+              <li>Anonimização, bloqueio ou eliminação de dados desnecessários, excessivos;</li>
+              <li>Portabilidade, observadas regulações do órgão competente;</li>
+              <li>Informação sobre compartilhamento;</li>
+              <li>Revogação do consentimento e oposição quando cabível.</li>
+            </ul>
+            <p>Para exercer direitos, utilize as opções em “Solicitações de Dados” ou contate nosso DPO.</p>
+          </div>
+
+          <div class="section" id="cookies">
+            <h2>3. Cookies</h2>
+            <p>Usamos cookies e tecnologias semelhantes para autenticação, segurança, preferências e métricas. Você pode gerenciá-los em “Preferências de Cookies”.</p>
+            <div class="grid-2">
+              <div class="note">
+                <strong>Estritamente necessários</strong>
+                <p>Essenciais para o funcionamento do site e não podem ser desativados.</p>
+              </div>
+              <div class="note">
+                <strong>Desempenho e análise</strong>
+                <p>Nos ajudam a entender o uso do produto para melhorar a experiência.</p>
+              </div>
+              <div class="note">
+                <strong>Funcionais</strong>
+                <p>Memorizam preferências e personalizações.</p>
+              </div>
+              <div class="note">
+                <strong>Marketing</strong>
+                <p>Utilizados para comunicações e ofertas relevantes, quando aplicável.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" id="preferencias">
+            <h2>4. Preferências de Cookies</h2>
+            <p class="muted">Respeitamos sua escolha. Você pode ajustar por categoria. Se seu navegador sinaliza Do Not Track, aplicaremos as restrições compatíveis.</p>
+            <div class="grid-2">
+              <div>
+                <label class="switch">
+                  <input type="checkbox" id="c-strict" checked disabled />
+                  <span class="track"><span class="thumb"></span></span>
+                  <span>Estritamente necessários</span>
+                </label>
+              </div>
+              <div>
+                <label class="switch">
+                  <input type="checkbox" id="c-perf" />
+                  <span class="track"><span class="thumb"></span></span>
+                  <span>Desempenho e análise</span>
+                </label>
+              </div>
+              <div>
+                <label class="switch">
+                  <input type="checkbox" id="c-func" />
+                  <span class="track"><span class="thumb"></span></span>
+                  <span>Funcionais</span>
+                </label>
+              </div>
+              <div>
+                <label class="switch">
+                  <input type="checkbox" id="c-mkt" />
+                  <span class="track"><span class="thumb"></span></span>
+                  <span>Marketing</span>
+                </label>
+              </div>
+            </div>
+            <div style="margin-top:.75rem; display:flex; gap:.5rem; flex-wrap:wrap">
+              <button class="btn" id="saveCookies">Salvar preferências</button>
+              <button class="btn ghost" id="resetCookies">Restaurar padrão</button>
+              <span class="muted" id="consentStatus">—</span>
+            </div>
+          </div>
+
+          <div class="section" id="solicitacoes">
+            <h2>5. Solicitações de Dados</h2>
+            <p>Use as opções abaixo para exercer seus direitos. Processaremos sua solicitação em prazo razoável e conforme a lei.</p>
+            <div class="grid-3">
+              <div class="card">
+                <div class="card__body">
+                  <h3>Acessar ou baixar meus dados</h3>
+                  <p class="muted">Gere um pacote com informações associadas à sua conta.</p>
+                  <button class="btn" id="reqExport">Solicitar exportação</button>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card__body">
+                  <h3>Corrigir dados</h3>
+                  <p class="muted">Peça atualização de dados incorretos ou desatualizados.</p>
+                  <button class="btn" id="reqRectify">Solicitar correção</button>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card__body">
+                  <h3>Excluir minha conta</h3>
+                  <p class="muted">Solicite eliminação dos dados, observadas exceções legais.</p>
+                  <button class="btn" id="reqDelete">Solicitar exclusão</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" id="versoes">
+            <h2>6. Versões e Histórico</h2>
+            <div id="versionList" class="grid-2"><!-- dynamic --></div>
+          </div>
+
+          <div class="section" id="glossario">
+            <h2>7. Glossário</h2>
+            <ul class="list">
+              <li><strong>Dado pessoal:</strong> informação relacionada a pessoa natural identificada ou identificável.</li>
+              <li><strong>Tratamento:</strong> toda operação realizada com dados pessoais.</li>
+              <li><strong>Operador:</strong> quem realiza o tratamento em nome do controlador.</li>
+              <li><strong>Consentimento:</strong> manifestação livre, informada e inequívoca pelo titular.</li>
+            </ul>
+          </div>
+
+          <div class="section" id="contatos">
+            <h2>8. Contatos e Reclamações</h2>
+            <p>DPO — Encarregado de Dados: <a href="mailto:privacidade@facil.app">privacidade@facil.app</a></p>
+            <p>Se não ficar satisfeito com nossa resposta, você pode buscar orientação junto às autoridades competentes de proteção de dados.</p>
+          </div>
+
+          <div class="footer">
+            Este documento é informativo e pode ser atualizado. Mantenha uma cópia para seus registros.
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast hidden" id="toast" role="status" aria-live="polite">
+    <div>ℹ️</div>
+    <div id="toastText">Mensagem</div>
+  </div>
+
+  <!-- Modal -->
+  <template id="modalTpl">
+    <div class="modal-backdrop" data-modal-backdrop>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+        <div class="m-head">
+          <strong id="mTitle">Título</strong>
+          <button class="btn icon ghost" data-modal-close aria-label="Fechar">✕</button>
+        </div>
+        <div class="m-body" id="mBody"></div>
+        <div class="m-foot" id="mFoot"></div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    (function(){
+      "use strict";
+
+      // Shorthands
+      const $ = (sel, root=document) => root.querySelector(sel);
+      const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+      const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
+
+      // State and constants
+      const LS = {
+        consent: "facil_cookie_prefs",
+        acceptAt: "facil_terms_accept_at",
+        acceptVer: "facil_terms_accept_version",
+        docVer: "facil_terms_doc_version",
+        audit: "facil_audit"
+      };
+
+      const VERSIONS = [
+        {
+          id:"v1.1.0",
+          date:"15/05/2024",
+          changes:[
+            "Ajustes de linguagem em Termos 1.8 e 1.10",
+            "Melhorias de clareza em Privacidade 2.4 e 2.6",
+            "Inclusão de seção resumida e glossário"
+          ]
+        },
+        {
+          id:"v1.2.0",
+          date:"10/11/2024",
+          changes:[
+            "Atualização do detalhamento de bases legais",
+            "Inclusão de mecanismo granular de cookies",
+            "Novo procedimento para solicitações de dados"
+          ]
+        },
+        {
+          id:"v1.3.0",
+          date:"02/03/2025",
+          changes:[
+            "Reorganização de seções e sumário",
+            "Aprimoramento das informações sobre segurança",
+            "Ajustes de acessibilidade e exportação"
+          ]
+        }
+      ];
+
+      // Theme
+      function toggleTheme(){
+        const html = document.documentElement;
+        html.setAttribute("data-theme", html.getAttribute("data-theme")==="dark" ? "light" : "dark");
+      }
+
+      // Toast
+      let toastTimer;
+      function toast(msg, kind="ok"){
+        const el = $("#toast"); if (!el) return;
+        el.classList.remove("hidden","ok","warn","err");
+        el.classList.add(kind);
+        $("#toastText").textContent = msg;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(()=> el.classList.add("hidden"), 3600);
+      }
+
+      // Modal
+      function modal({ title, body, actions=[] }){
+        const tpl = $("#modalTpl").content.cloneNode(true);
+        const root = tpl.querySelector("[data-modal-backdrop]");
+        const mTitle = tpl.querySelector("#mTitle");
+        const mBody = tpl.querySelector("#mBody");
+        const mFoot = tpl.querySelector("#mFoot");
+        mTitle.textContent = title || "Informação";
+        if (typeof body === "string"){ mBody.innerHTML = body; } else if (body) { mBody.append(body); }
+        (actions||[]).forEach(btn=>{
+          const b = document.createElement("button");
+          b.className = "btn" + (btn.primary ? " primary" : "");
+          b.textContent = btn.text || "Ok";
+          b.addEventListener("click", async ()=>{
+            try{
+              const res = btn.onClick ? await btn.onClick() : null;
+              if (btn.close !== false) close();
+              if (btn.afterClose) btn.afterClose(res);
+            }catch(e){ console.error(e); toast("Falha ao executar ação", "err"); }
+          });
+          mFoot.append(b);
+        });
+        function close(){ root.remove(); }
+        on(tpl.querySelector("[data-modal-close]"), "click", close);
+        on(root, "click", (e)=>{ if (e.target === root) close(); });
+        document.body.append(tpl);
+        return { close, root };
+      }
+
+      // Accept logic
+      function setActiveVersion(verId){
+        const v = VERSIONS.find(x=> x.id===verId) || VERSIONS[VERSIONS.length-1];
+        localStorage.setItem(LS.docVer, v.id);
+        $("#versionSelect").value = v.id;
+        $("#versionBadge").textContent = "Versão: " + v.id;
+        $("#dateBadge").textContent = "Vigência: " + v.date;
+        renderVersionHistory();
+        renderAcceptStatus();
+      }
+
+      function getActiveVersion(){
+        const saved = localStorage.getItem(LS.docVer);
+        return VERSIONS.find(v=> v.id===saved) || VERSIONS[VERSIONS.length-1];
+      }
+
+      function renderVersionOptions(){
+        const sel = $("#versionSelect");
+        sel.innerHTML = VERSIONS.map(v=> `<option value="${v.id}">${v.id} — ${v.date}</option>`).join("");
+      }
+
+      function renderVersionHistory(){
+        const box = $("#versionList");
+        box.innerHTML = "";
+        VERSIONS.slice().reverse().forEach(v=>{
+          const card = document.createElement("div");
+          card.className = "card";
+          const active = v.id === getActiveVersion().id;
+          card.innerHTML = `
+            <div class="card__body">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:.5rem">
+                <div>
+                  <strong>${v.id}</strong>
+                  <div class="muted">Vigência: ${v.date}</div>
+                </div>
+                <div>
+                  <span class="badge ${active?'ok':''}">${active? 'Ativa' : 'Arquivo'}</span>
+                </div>
+              </div>
+              <div style="margin-top:.5rem">
+                <strong>Alterações:</strong>
+                <ul class="list">${v.changes.map(c=> `<li>${c}</li>`).join("")}</ul>
+              </div>
+              <div style="margin-top:.5rem; display:flex; gap:.5rem; flex-wrap:wrap">
+                <button class="btn ghost" data-view="${v.id}">Ver esta versão</button>
+                <button class="btn" data-export="${v.id}">Baixar TXT</button>
+              </div>
+            </div>
+          `;
+          box.append(card);
+        });
+        // bind
+        $$("button[data-view]").forEach(b=> on(b, "click", ()=>{
+          setActiveVersion(b.getAttribute("data-view"));
+          toast("Versão alterada", "ok");
+        }));
+        $$("button[data-export]").forEach(b=> on(b, "click", ()=>{
+          downloadTextBundle(b.getAttribute("data-export"));
+        }));
+      }
+
+      function renderAcceptStatus(){
+        const acceptedAt = localStorage.getItem(LS.acceptAt);
+        const acceptedVer = localStorage.getItem(LS.acceptVer);
+        const active = getActiveVersion().id;
+        const badge = $("#acceptBadge");
+        const notice = $("#acceptNotice");
+        const btn = $("#acceptBtn");
+
+        if (acceptedAt && acceptedVer === active){
+          badge.textContent = "Aceite: registrado";
+          badge.classList.remove("warn");
+          badge.classList.add("ok");
+          notice.classList.add("hidden");
+          btn.disabled = true;
+          btn.textContent = "Aceite registrado";
+          btn.title = "Já registrado para esta versão";
+        }else{
+          badge.textContent = "Aceite: pendente";
+          badge.classList.add("warn");
+          badge.classList.remove("ok");
+          notice.classList.remove("hidden");
+          btn.disabled = false;
+          btn.textContent = "Aceito os termos";
+          btn.title = "Registrar aceite para a versão ativa";
+        }
+      }
+
+      function doAccept(){
+        const v = getActiveVersion().id;
+        modal({
+          title: "Confirmar aceite",
+          body: `
+            <p>Você confirma ter lido e concorda com os Termos e a Política de Privacidade na versão <strong>${v}</strong>?</p>
+            <p class="muted">Uma marcação com data e versão será salva localmente para seus registros.</p>
+          `,
+          actions: [
+            { text:"Cancelar" },
+            { text:"Confirmar", primary:true, onClick: ()=>{
+              const stamp = new Date().toISOString();
+              localStorage.setItem(LS.acceptAt, stamp);
+              localStorage.setItem(LS.acceptVer, v);
+              renderAcceptStatus();
+              logAudit("aceite", { version:v, at: stamp });
+              toast("Aceite registrado", "ok");
+            }}
+          ]
+        });
+      }
+
+      // Search
+      function getDocumentText(){
+        // gather text content from main sections
+        const ids = ["termos","privacidade","cookies","preferencias","solicitacoes","versoes","glossario","contatos"];
+        let text = "";
+        ids.forEach(id=>{
+          const el = document.getElementById(id);
+          if (el){
+            text += `\n## ${el.querySelector("h2")?.textContent || id}\n`;
+            text += el.innerText.replace(/\n{3,}/g, "\n\n");
+            text += "\n";
+          }
+        });
+        return text.trim();
+      }
+
+      function doSearch(){
+        const q = $("#q").value.trim();
+        const count = $("#searchCount");
+        if (!q){
+          count.textContent = "0 resultados";
+          $("#btnClear").click();
+          return;
+        }
+        // simple result modal with snippets
+        const text = getDocumentText();
+        const lines = text.split("\n");
+        const res = [];
+        const needle = q.toLowerCase();
+        lines.forEach((line, idx)=>{
+          if (line.toLowerCase().includes(needle)){
+            res.push({ idx, line });
+          }
+        });
+        count.textContent = res.length + " resultados";
+        if (res.length === 0){
+          toast("Nenhum resultado encontrado", "warn");
+          return;
+        }
+        const body = document.createElement("div");
+        body.innerHTML = `
+          <p>Encontradas <strong>${res.length}</strong> ocorrências para “${escapeHtml(q)}”.</p>
+          <div style="display:grid; gap:.5rem; max-height:380px; overflow:auto">
+            ${res.slice(0,120).map(r=> `
+              <div class="kv">
+                <span class="muted">Linha ${r.idx+1}</span>
+                <span>${highlight(r.line, q)}</span>
+              </div>
+            `).join("")}
+          </div>
+        `;
+        modal({
+          title:"Resultados da pesquisa",
+          body,
+          actions:[{ text:"Fechar", primary:true }]
+        });
+      }
+
+      function clearSearch(){
+        $("#q").value = "";
+        $("#searchCount").textContent = "0 resultados";
+      }
+
+      function highlight(line, q){
+        const n = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        return line.replace(new RegExp(n, "gi"), m=> `<mark>${escapeHtml(m)}</mark>`);
+      }
+
+      function escapeHtml(str){
+        return str.replace(/[&<>"']/g, s=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[s]));
+      }
+
+      // Cookie prefs
+      function getPref(){
+        try{ return JSON.parse(localStorage.getItem(LS.consent) || "{}"); }catch{ return {}; }
+      }
+      function setPref(obj){
+        localStorage.setItem(LS.consent, JSON.stringify(obj));
+        // Set a simple cookie string (non essential) to demonstrate persistence
+        try{ document.cookie = "facil_consent=" + encodeURIComponent(JSON.stringify(obj)) + "; path=/; max-age=" + (60*60*24*365); }catch{}
+      }
+      function renderPrefs(){
+        const p = getPref();
+        $("#c-perf").checked = !!p.perf;
+        $("#c-func").checked = !!p.func;
+        $("#c-mkt").checked = !!p.mkt;
+        const dnt = isDNT();
+        const status = [];
+        status.push("Estritamente necessários: ativos");
+        status.push("Desempenho: " + (p.perf ? "ativo" : (dnt ? "bloqueado por DNT" : "inativo")));
+        status.push("Funcionais: " + (p.func ? "ativo" : "inativo"));
+        status.push("Marketing: " + (p.mkt ? "ativo" : (dnt ? "bloqueado por DNT" : "inativo")));
+        $("#consentStatus").textContent = status.join(" · ");
+      }
+      function isDNT(){
+        return (window.doNotTrack === "1") || (navigator.doNotTrack === "1") || (navigator.msDoNotTrack === "1");
+      }
+      function savePrefs(){
+        const dnt = isDNT();
+        const pref = {
+          strict: true,
+          perf: dnt ? false : $("#c-perf").checked,
+          func: $("#c-func").checked,
+          mkt: dnt ? false : $("#c-mkt").checked,
+          at: new Date().toISOString()
+        };
+        setPref(pref);
+        renderPrefs();
+        logAudit("consent", { pref });
+        toast("Preferências salvas", "ok");
+      }
+      function resetPrefs(){
+        const dnt = isDNT();
+        const def = { strict:true, perf: !dnt, func:true, mkt: !dnt, at:new Date().toISOString() };
+        setPref(def);
+        renderPrefs();
+        logAudit("consent_reset", { def });
+        toast("Preferências restauradas", "ok");
+      }
+
+      // Solicitações
+      function reqExport(){
+        const b = document.createElement("div");
+        b.innerHTML = `
+          <label>E-mail para envio</label>
+          <input type="email" id="expEmail" placeholder="voce@exemplo.com" />
+          <label>Escopo</label>
+          <select id="expScope">
+            <option value="completo">Pacote completo (conta, uso, preferências)</option>
+            <option value="conta">Apenas dados de conta</option>
+            <option value="uso">Registros de uso</option>
+          </select>
+          <p class="note">Você também pode baixar um pacote local agora.</p>
+        `;
+        modal({
+          title:"Solicitar exportação",
+          body:b,
+          actions:[
+            { text:"Baixar agora", onClick: ()=>{
+              // Gera um pacote local com texto e preferências
+              downloadJSONBundle();
+              toast("Pacote local gerado", "ok");
+            }},
+            { text:"Solicitar por e-mail", primary:true, onClick: ()=>{
+              const email = $("#expEmail")?.value?.trim();
+              if (!(email && email.includes("@"))){ toast("Informe um e-mail válido", "warn"); return; }
+              const scope = $("#expScope")?.value || "completo";
+              logAudit("req_export", { email, scope });
+              toast("Solicitação registrada", "ok");
+            }}
+          ]
+        });
+      }
+
+      function reqRectify(){
+        const b = document.createElement("div");
+        b.innerHTML = `
+          <label>E-mail de contato</label>
+          <input type="email" id="rectEmail" placeholder="voce@exemplo.com" />
+          <label>Descreva o que deseja corrigir</label>
+          <textarea id="rectText" placeholder="Ex.: atualizar telefone e endereço..."></textarea>
+        `;
+        modal({
+          title:"Solicitar correção",
+          body:b,
+          actions:[
+            { text:"Cancelar" },
+            { text:"Enviar", primary:true, onClick: ()=>{
+              const email = $("#rectEmail")?.value?.trim();
+              const txt = $("#rectText")?.value?.trim();
+              if (!(email && email.includes("@") && txt)){ toast("Preencha os campos", "warn"); return; }
+              logAudit("req_rectify", { email, txt });
+              toast("Solicitação registrada", "ok");
+            }}
+          ]
+        });
+      }
+
+      function reqDelete(){
+        const b = document.createElement("div");
+        b.innerHTML = `
+          <p>Esta solicitação iniciará o processo de eliminação de dados, sujeito a exceções legais (por exemplo, retenções obrigatórias).</p>
+          <label>Confirme seu e-mail</label>
+          <input type="email" id="delEmail" placeholder="voce@exemplo.com" />
+          <label>Motivo (opcional)</label>
+          <textarea id="delWhy" placeholder="Compartilhe o motivo, se desejar."></textarea>
+        `;
+        modal({
+          title:"Solicitar exclusão",
+          body:b,
+          actions:[
+            { text:"Cancelar" },
+            { text:"Confirmar solicitação", primary:true, onClick: ()=>{
+              const email = $("#delEmail")?.value?.trim();
+              if (!(email && email.includes("@"))){ toast("Informe um e-mail válido", "warn"); return; }
+              const why = $("#delWhy")?.value?.trim();
+              logAudit("req_delete", { email, why });
+              toast("Solicitação registrada", "ok");
+            }}
+          ]
+        });
+      }
+
+      // Downloads
+      function download(filename, content, type="text/plain"){
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = filename; a.click();
+        setTimeout(()=> URL.revokeObjectURL(url), 1000);
+      }
+
+      function buildTextBundle(verId){
+        const header = `Facil — Termos e Privacidade
+Versão: ${verId}
+Data de vigência: ${VERSIONS.find(v=>v.id===verId)?.date || "—"}
+------------------------------
+
+`;
+        return header + getDocumentText();
+      }
+
+      function downloadTextBundle(verId){
+        const name = `Facil_Termos_Privacidade_${verId}.txt`;
+        download(name, buildTextBundle(verId), "text/plain;charset=utf-8");
+      }
+
+      function downloadJSONBundle(){
+        const payload = {
+          document: {
+            version: getActiveVersion().id,
+            date: getActiveVersion().date
+          },
+          acceptance: {
+            at: localStorage.getItem(LS.acceptAt) || null,
+            version: localStorage.getItem(LS.acceptVer) || null
+          },
+          cookies: getPref()
+        };
+        download(`Facil_Privacidade_${payload.document.version}.json`, JSON.stringify(payload, null, 2), "application/json");
+      }
+
+      // Audit
+      function logAudit(type, data){
+        try{
+          const arr = JSON.parse(localStorage.getItem(LS.audit) || "[]");
+          arr.unshift({ type, data, at:new Date().toISOString() });
+          localStorage.setItem(LS.audit, JSON.stringify(arr.slice(0,200)));
+        }catch(e){ console.warn("Audit log error", e); }
+      }
+
+      // Expand/Collapse sections
+      function expandAll(){
+        // here we keep as is; sections already expanded
+        toast("Seções expandidas", "ok");
+      }
+      function collapseAll(){
+        // collapse by toggling details tags if present; as we use headings only, show a hint
+        toast("As seções principais permanecem visíveis por padrão", "warn");
+      }
+
+      // Events and init
+      function bindUI(){
+        on($("#themeToggle"), "click", toggleTheme);
+        on($("#printBtn"), "click", ()=> window.print());
+        on($("#collapseAside"), "click", ()=>{
+          const aside = document.querySelector("aside.nav");
+          aside.classList.toggle("hidden");
+          toast(aside.classList.contains("hidden") ? "Menu recolhido" : "Menu exibido", "ok");
+        });
+
+        renderVersionOptions();
+        setActiveVersion(localStorage.getItem(LS.docVer) || VERSIONS[VERSIONS.length-1].id);
+        on($("#versionSelect"), "change", (e)=> setActiveVersion(e.target.value));
+
+        on($("#acceptBtn"), "click", doAccept);
+        on($("#downloadTxt"), "click", ()=> downloadTextBundle(getActiveVersion().id));
+        on($("#downloadJson"), "click", downloadJSONBundle);
+
+        on($("#btnSearch"), "click", doSearch);
+        on($("#btnClear"), "click", clearSearch);
+
+        on($("#btnExpand"), "click", expandAll);
+        on($("#btnCollapse"), "click", collapseAll);
+
+        // Cookie prefs
+        renderPrefs();
+        on($("#saveCookies"), "click", savePrefs);
+        on($("#resetCookies"), "click", resetPrefs);
+
+        // Solicitações
+        on($("#reqExport"), "click", reqExport);
+        on($("#reqRectify"), "click", reqRectify);
+        on($("#reqDelete"), "click", reqDelete);
+
+        // Env chip
+        const chip = $("#envChip");
+        chip.textContent = "app";
+        chip.title = "Ambiente de aplicação";
+      }
+
+      // Accessibility: keyboard shortcuts
+      function bindShortcuts(){
+        on(document, "keydown", (e)=>{
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="f"){ e.preventDefault(); $("#q").focus(); }
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="p"){ e.preventDefault(); window.print(); }
+        });
+      }
+
+      // Initialize preferences defaults on first run
+      function seedPrefsIfEmpty(){
+        if (!localStorage.getItem(LS.consent)){
+          const dnt = isDNT();
+          setPref({ strict:true, perf:!dnt, func:true, mkt:!dnt, at:new Date().toISOString() });
+        }
+      }
+
+      function init(){
+        seedPrefsIfEmpty();
+        bindUI();
+        bindShortcuts();
+      }
+
+      document.addEventListener("DOMContentLoaded", init);
+    })();
+  </script>
+</body>
+</html>

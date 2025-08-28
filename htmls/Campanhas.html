@@ -1,0 +1,1223 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facil — Campanhas (CRUD)</title>
+  <meta name="description" content="Gerencie campanhas da Facil: criar, editar, pausar, encerrar, duplicar e excluir. Filtros, busca, paginação e exportação CSV." />
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --bg-elev:#111217;
+      --card:#14161d;
+      --card-2:#191c24;
+      --border:#232633;
+      --muted:#98a2b3;
+      --text:#e6e8ee;
+      --accent:#22c55e;
+      --accent-2:#16a34a;
+      --danger:#ef4444;
+      --warning:#f59e0b;
+      --info:#60a5fa;
+      --radius:14px;
+      --radius-sm:10px;
+      --shadow:0 2px 10px rgba(0,0,0,.25);
+      --shadow-lg:0 24px 48px rgba(0,0,0,.35);
+      --focus:0 0 0 3px rgba(34,197,94,.35);
+      --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f7fafc;
+        --bg-elev:#ffffff;
+        --card:#ffffff;
+        --card-2:#f8fafc;
+        --border:#e5e7eb;
+        --muted:#475467;
+        --text:#0b1220;
+        --shadow:0 2px 10px rgba(0,0,0,.07);
+        --shadow-lg:0 24px 48px rgba(0,0,0,.12);
+        --focus:0 0 0 3px rgba(34,197,94,.35);
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:radial-gradient(1200px 800px at 10% -10%,rgba(34,197,94,.12),transparent 40%) ,
+                 radial-gradient(1400px 900px at 110% 20%,rgba(96,165,250,.08),transparent 35%) ,
+                 var(--bg);
+      color:var(--text);
+      font-family:var(--font);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    button{font-family:inherit}
+    .container{max-width:1120px;margin:0 auto;padding:24px}
+    header.nav{
+      position:sticky;top:0;z-index:50;
+      backdrop-filter:saturate(140%) blur(10px);
+      background:linear-gradient(to bottom, rgba(11,12,16,.75), rgba(11,12,16,.35));
+      border-bottom:1px solid var(--border);
+    }
+    .nav-inner{display:flex;align-items:center;gap:16px;justify-content:space-between;padding:14px 20px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{
+      width:36px;height:36px;border-radius:9px;
+      background:conic-gradient(from 120deg,#22c55e, #1d4ed8, #22c55e);
+      box-shadow:0 0 0 3px rgba(34,197,94,.15), inset 0 -6px 22px rgba(0,0,0,.35);
+    }
+    .brand h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+    .nav-links{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border:1px dashed var(--border);
+      border-radius:999px;background:linear-gradient(180deg,var(--bg-elev),transparent);
+      color:var(--muted);font-size:12px;
+    }
+    .chip .dot{width:8px;height:8px;border-radius:999px;background:var(--accent)}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:10px;border:1px solid var(--border);
+      background:linear-gradient(180deg,var(--card), var(--card-2));
+      color:var(--text);cursor:pointer;box-shadow:var(--shadow);
+      transition:transform .06s ease, box-shadow .15s ease, border-color .2s ease, background .2s ease, filter .2s ease;
+      user-select:none;text-decoration:none;
+    }
+    .btn:hover{transform:translateY(-1px);border-color:#2a2f3f;filter:saturate(1.05)}
+    .btn:active{transform:translateY(0)}
+    .btn.primary{background:linear-gradient(180deg,#22c55e,#16a34a);border-color:#16a34a;color:#02110a;box-shadow:0 10px 30px rgba(34,197,94,.28)}
+    .btn.primary:hover{filter:saturate(1.15)}
+    .btn.ghost{background:transparent}
+    .btn.warn{background:linear-gradient(180deg,#f59e0b,#d97706);border-color:#c2410c;color:#1a1002}
+    .btn.danger{background:linear-gradient(180deg,#ef4444,#dc2626);border-color:#b91c1c;color:#2b0a0a}
+    .btn.small{padding:8px 10px;border-radius:9px;font-size:12px}
+    .btn.icon{padding:8px;width:36px;height:36px}
+    .grid{
+      display:grid;gap:14px;
+      grid-template-columns:repeat(12,1fr);
+    }
+    .col-12{grid-column:span 12}
+    @media (min-width:640px){
+      .col-sm-6{grid-column:span 6}
+    }
+    @media (min-width:768px){
+      .col-md-4{grid-column:span 4}
+      .col-md-6{grid-column:span 6}
+    }
+    .card{
+      background:linear-gradient(180deg,var(--card), var(--card-2));
+      border:1px solid var(--border);border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .card.header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:12px}
+    .title{display:flex;align-items:center;gap:12px}
+    .title h2{margin:0;font-size:18px}
+    .muted{color:var(--muted)}
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .toolbar .spacer{flex:1 1 auto}
+    .field{display:flex;flex-direction:column;gap:8px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    input, select, textarea{
+      width:100%;padding:10px 12px;border-radius:10px;
+      border:1px solid var(--border);background:linear-gradient(180deg,var(--bg-elev), transparent 120%);
+      color:var(--text);outline:none;transition:border-color .2s ease, box-shadow .2s ease;
+    }
+    input:focus, select:focus, textarea:focus{box-shadow:var(--focus);border-color:#2a7a4a}
+    .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    @media (min-width:768px){.kpis{grid-template-columns:repeat(4,1fr)}}
+    .kpi{padding:14px;border-radius:12px;border:1px solid var(--border);background:linear-gradient(180deg,var(--card),var(--card-2))}
+    .kpi b{font-size:18px}
+    .table{
+      width:100%;border-collapse:separate;border-spacing:0 10px;
+    }
+    .trow{
+      display:grid;grid-template-columns: 36px 1.2fr .8fr .8fr .7fr .9fr .8fr 160px;
+      gap:10px;align-items:center;padding:10px 10px;
+      background:linear-gradient(180deg,var(--card), var(--card-2));
+      border:1px solid var(--border);border-radius:12px;
+    }
+    @media (max-width:960px){
+      .trow{grid-template-columns: 36px 1.6fr 1fr .9fr .9fr 120px}
+      .col-hide-md{display:none}
+    }
+    @media (max-width:640px){
+      .trow{grid-template-columns: 28px 1fr 90px 100px}
+      .col-hide-sm{display:none}
+    }
+    .trow .name{display:flex;align-items:center;gap:10px}
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:4px 8px;border-radius:999px;border:1px solid var(--border);
+      color:var(--muted);font-size:12px;background:linear-gradient(180deg,var(--bg-elev),transparent);
+      white-space:nowrap;
+    }
+    .badge.success{color:#0f5132;border-color:#1b6d3a;background:linear-gradient(180deg, rgba(34,197,94,.15), transparent)}
+    .badge.warn{color:#7a4b06;border-color:#a16207;background:linear-gradient(180deg, rgba(245,158,11,.18), transparent)}
+    .badge.danger{color:#7f1d1d;border-color:#b91c1c;background:linear-gradient(180deg, rgba(239,68,68,.15), transparent)}
+    .status-dot{width:8px;height:8px;border-radius:999px;background:var(--muted)}
+    .status-ativa{background:#22c55e}
+    .status-pausada{background:#f59e0b}
+    .status-encerrada{background:#ef4444}
+    .actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .empty{padding:40px;text-align:center;color:var(--muted)}
+    .pagination{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+    .page-btns{display:flex;gap:8px;flex-wrap:wrap}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .toast{
+      position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:120;
+    }
+    .toast .item{
+      min-width:220px;max-width:520px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);
+      background:linear-gradient(180deg,var(--bg-elev),var(--card-2));box-shadow:var(--shadow-lg);display:flex;gap:10px;align-items:flex-start
+    }
+    .toast .item.success{border-color:#1d6d3a}
+    .toast .item.danger{border-color:#b91c1c}
+    dialog.modal{
+      border:none;border-radius:16px;padding:0;max-width:720px;width:calc(100% - 24px);
+      background:linear-gradient(180deg,var(--card), var(--card-2));color:var(--text);
+      box-shadow:var(--shadow-lg);
+    }
+    dialog::backdrop{background:rgba(0,0,0,.5);backdrop-filter:blur(2px)}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border)}
+    .modal-body{padding:16px}
+    .modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px;border-top:1px solid var(--border)}
+    .two{display:grid;grid-template-columns:1fr;gap:10px}
+    @media (min-width:720px){.two{grid-template-columns:1fr 1fr}}
+    .help{font-size:12px;color:var(--muted)}
+    .switch{position:relative;width:44px;height:26px;display:inline-flex;align-items:center}
+    .switch input{appearance:none;width:44px;height:26px;border-radius:999px;border:1px solid var(--border);background:var(--bg-elev);outline:none;transition:.2s ease;position:relative}
+    .switch input:checked{background:linear-gradient(180deg,#22c55e,#16a34a);border-color:#16a34a}
+    .switch .knob{position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:999px;background:#fff;transition:.2s ease}
+    .switch input:checked + .knob{transform:translateX(18px)}
+    .toolbar .sep{width:1px;height:28px;background:var(--border)}
+    .tag{padding:4px 8px;border-radius:7px;border:1px solid var(--border);color:var(--muted);font-size:12px}
+    .upload{
+      border:1px dashed var(--border);border-radius:12px;padding:12px;display:flex;gap:10px;align-items:center;justify-content:space-between
+    }
+    .visually-center{display:flex;align-items:center;justify-content:center}
+  </style>
+</head>
+<body>
+  <header class="nav" role="banner">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1 aria-label="Facil">Facil</h1>
+          <div class="muted" style="font-size:12px">Campanhas (CRUD)</div>
+        </div>
+      </div>
+      <nav class="nav-links" aria-label="Navegação principal">
+        <a class="btn ghost small" href="#" id="goDashboard">Dashboard</a>
+        <span class="chip" id="envChip"><span class="dot" aria-hidden="true"></span>Admin</span>
+        <button class="btn small" id="logoutBtn" title="Sair">Sair</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" id="content" aria-busy="false">
+    <section class="card header" aria-labelledby="pgTitle">
+      <div class="title">
+        <span class="badge"><span class="status-dot status-ativa"></span> Painel Admin</span>
+        <h2 id="pgTitle">Campanhas</h2>
+        <span class="muted">Gerencie e acompanhe o desempenho</span>
+      </div>
+      <div class="toolbar">
+        <button class="btn primary" id="newCampaignBtn">Nova Campanha</button>
+        <button class="btn ghost" id="exportCsvBtn">Exportar CSV</button>
+        <button class="btn ghost" id="importBtn">Importar</button>
+      </div>
+    </section>
+
+    <section class="grid" style="margin-top:14px">
+      <div class="col-12">
+        <div class="card" style="padding:14px">
+          <div class="toolbar" role="region" aria-label="Filtros de campanhas">
+            <div class="field" style="min-width:220px;flex:1 1 220px">
+              <label for="q" class="muted">Buscar</label>
+              <input id="q" type="search" placeholder="Nome, slug, owner, tags..." />
+            </div>
+            <div class="field" style="width:160px">
+              <label for="status" class="muted">Status</label>
+              <select id="status">
+                <option value="">Todos</option>
+                <option value="ativa">Ativa</option>
+                <option value="pausada">Pausada</option>
+                <option value="encerrada">Encerrada</option>
+              </select>
+            </div>
+            <div class="field" style="width:160px">
+              <label for="channel" class="muted">Canal</label>
+              <select id="channel">
+                <option value="">Todos</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="instagram">Instagram</option>
+                <option value="email">E-mail</option>
+                <option value="site">Site</option>
+                <option value="outros">Outros</option>
+              </select>
+            </div>
+            <div class="field" style="width:160px">
+              <label for="sort" class="muted">Ordenar</label>
+              <select id="sort">
+                <option value="createdAt_desc">Mais recentes</option>
+                <option value="createdAt_asc">Mais antigas</option>
+                <option value="name_asc">Nome (A-Z)</option>
+                <option value="name_desc">Nome (Z-A)</option>
+                <option value="conv_desc">Maior conversão</option>
+                <option value="leads_desc">Mais leads</option>
+              </select>
+            </div>
+            <div class="field" style="width:160px">
+              <label for="from" class="muted">De</label>
+              <input id="from" type="date" />
+            </div>
+            <div class="field" style="width:160px">
+              <label for="to" class="muted">Até</label>
+              <input id="to" type="date" />
+            </div>
+            <div class="spacer"></div>
+            <div class="row">
+              <button class="btn small" id="clearFiltersBtn">Limpar</button>
+              <button class="btn small" id="applyFiltersBtn">Aplicar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="kpis">
+          <div class="kpi"><div class="muted">Total</div><b id="kpiTotal">0</b></div>
+          <div class="kpi"><div class="muted">Ativas</div><b id="kpiAtivas">0</b></div>
+          <div class="kpi"><div class="muted">Pausadas</div><b id="kpiPausadas">0</b></div>
+          <div class="kpi"><div class="muted">Encerradas</div><b id="kpiEncerradas">0</b></div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="card" style="padding:14px">
+          <div class="toolbar" style="margin-bottom:10px">
+            <div class="row">
+              <label class="badge"><input type="checkbox" id="selectAll" style="margin-right:8px" /> Selecionar tudo</label>
+              <span class="tag" id="selectionCount">0 selecionadas</span>
+            </div>
+            <div class="spacer"></div>
+            <div class="row">
+              <button class="btn small" id="bulkActivateBtn">Ativar</button>
+              <button class="btn small warn" id="bulkPauseBtn">Pausar</button>
+              <button class="btn small" id="bulkCloseBtn">Encerrar</button>
+              <button class="btn small danger" id="bulkDeleteBtn">Excluir</button>
+            </div>
+          </div>
+
+          <div role="table" aria-label="Lista de campanhas">
+            <div class="trow" role="row" aria-hidden="true" style="opacity:.85;pointer-events:none">
+              <div class="muted" role="columnheader"></div>
+              <div class="muted" role="columnheader">Campanha</div>
+              <div class="muted col-hide-sm" role="columnheader">Status</div>
+              <div class="muted col-hide-sm" role="columnheader">Canal</div>
+              <div class="muted col-hide-md" role="columnheader">Leads</div>
+              <div class="muted col-hide-md" role="columnheader">Apostas</div>
+              <div class="muted col-hide-sm" role="columnheader">Conversão</div>
+              <div class="muted" role="columnheader" style="text-align:right">Ações</div>
+            </div>
+
+            <div id="list"></div>
+
+            <div class="empty" id="empty" hidden>
+              Nenhuma campanha encontrada. Ajuste os filtros ou crie uma nova campanha.
+            </div>
+          </div>
+
+          <div class="pagination" style="margin-top:12px">
+            <div class="muted" id="pageInfo">Página 1 de 1</div>
+            <div class="page-btns">
+              <button class="btn small" id="prevPageBtn" aria-label="Página anterior">◀</button>
+              <button class="btn small" id="nextPageBtn" aria-label="Próxima página">▶</button>
+              <select id="pageSize" class="btn small" aria-label="Itens por página">
+                <option value="5">5 / pág.</option>
+                <option value="10" selected>10 / pág.</option>
+                <option value="20">20 / pág.</option>
+                <option value="50">50 / pág.</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Form campanha -->
+  <dialog class="modal" id="campaignModal" aria-labelledby="campaignModalTitle">
+    <form method="dialog" id="campaignForm" novalidate>
+      <div class="modal-head">
+        <div class="title">
+          <span class="badge"><span class="status-dot status-ativa"></span> Campanha</span>
+          <h3 id="campaignModalTitle" style="margin:0">Nova campanha</h3>
+        </div>
+        <button class="btn icon" value="cancel" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="two">
+          <div class="field">
+            <label for="f_name">Nome</label>
+            <input id="f_name" required placeholder="Ex.: Lançamento Independência" />
+            <div class="help">Será exibido na listagem e relatórios</div>
+          </div>
+          <div class="field">
+            <label for="f_slug">Slug</label>
+            <input id="f_slug" placeholder="ex.: lancamento-independencia" />
+            <div class="help">Usado em links de campanha (gerado automaticamente, pode editar)</div>
+          </div>
+          <div class="field">
+            <label for="f_status">Status</label>
+            <select id="f_status">
+              <option value="ativa">Ativa</option>
+              <option value="pausada">Pausada</option>
+              <option value="encerrada">Encerrada</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f_channel">Canal</label>
+            <select id="f_channel">
+              <option value="whatsapp">WhatsApp</option>
+              <option value="instagram">Instagram</option>
+              <option value="email">E-mail</option>
+              <option value="site">Site</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f_owner">Responsável</label>
+            <input id="f_owner" placeholder="Ex.: João Silva" />
+          </div>
+          <div class="field">
+            <label for="f_budget">Orçamento (R$)</label>
+            <input id="f_budget" inputmode="decimal" placeholder="Ex.: 500,00" />
+          </div>
+        </div>
+
+        <div class="two" style="margin-top:10px">
+          <div class="field">
+            <label for="f_start">Início</label>
+            <input id="f_start" type="date" />
+          </div>
+          <div class="field">
+            <label for="f_end">Término</label>
+            <input id="f_end" type="date" />
+          </div>
+        </div>
+
+        <div class="two" style="margin-top:10px">
+          <div class="field">
+            <label for="f_desc">Descrição</label>
+            <textarea id="f_desc" rows="3" placeholder="Resumo curto da campanha"></textarea>
+          </div>
+          <div class="field">
+            <label for="f_tags">Tags</label>
+            <input id="f_tags" placeholder="ex.: indep, lotofacil, vip" />
+            <div class="help">Separadas por vírgula</div>
+          </div>
+        </div>
+
+        <div class="two" style="margin-top:10px">
+          <div class="field">
+            <label for="f_target">Meta de leads</label>
+            <input id="f_target" inputmode="numeric" placeholder="Ex.: 200" />
+          </div>
+          <div class="field">
+            <label for="f_price">Preço médio por cota (R$)</label>
+            <input id="f_price" inputmode="decimal" placeholder="Ex.: 12,00" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;align-items:center;justify-content:space-between;gap:14px">
+          <div class="field" style="flex:1">
+            <label for="f_utm">UTM base</label>
+            <input id="f_utm" placeholder="utm_source=ig&utm_medium=profile&utm_campaign=indep" />
+            <div class="help">Anexada ao link público da campanha</div>
+          </div>
+          <label class="switch" title="Campanha pública">
+            <input id="f_public" type="checkbox" />
+            <span class="knob"></span>
+          </label>
+          <div class="help">Pública</div>
+        </div>
+
+        <div class="upload" style="margin-top:12px">
+          <div>
+            <b>Midia/Assets</b>
+            <div class="help">Arraste e solte imagens (mock). Somente visual.</div>
+          </div>
+          <div class="row">
+            <button class="btn small" id="mockUploadBtn" type="button">Enviar arquivo</button>
+            <span class="tag" id="mockAssetCount">0 arquivos</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-foot">
+        <button class="btn" value="cancel">Cancelar</button>
+        <button class="btn primary" id="saveCampaignBtn" value="default">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: confirmação genérica -->
+  <dialog class="modal" id="confirmModal" aria-labelledby="confirmTitle">
+    <form method="dialog">
+      <div class="modal-head">
+        <h3 id="confirmTitle" style="margin:0">Confirmar</h3>
+        <button class="btn icon" value="cancel" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="confirmMsg">Tem certeza?</div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" value="cancel">Cancelar</button>
+        <button class="btn danger" value="confirm">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: import -->
+  <dialog class="modal" id="importModal" aria-labelledby="importTitle">
+    <form method="dialog" id="importForm">
+      <div class="modal-head">
+        <h3 id="importTitle" style="margin:0">Importar campanhas (CSV)</h3>
+        <button class="btn icon" value="cancel" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="csvInput">Cole o CSV (header: name,slug,status,channel,start,end,budget)</label>
+          <textarea id="csvInput" rows="8" placeholder="name,slug,status,channel,start,end,budget&#10;Minha campanha,minha-campanha,ativa,instagram,2025-08-01,2025-09-01,500"></textarea>
+        </div>
+        <div class="help">Dados adicionais podem ser preenchidos depois (owner, desc, tags etc.).</div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" value="cancel">Cancelar</button>
+        <button class="btn primary" id="confirmImport" value="default">Importar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      // Utilidades DOM
+      const $ = (s, el=document) => el.querySelector(s);
+      const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+
+      // Rotas e configuração
+      const CONFIG = {
+        routes:{
+          login:"/admin",
+          dashboard:"/dashboard",
+          campaigns:"/campanhas"
+        },
+        storage:{
+          adminToken:"facil_admin_token",
+          campaigns:"facil_campaigns"
+        }
+      };
+
+      // Estado
+      const state = {
+        authToken:null,
+        campaigns:[],
+        filtered:[],
+        selection:new Set(),
+        filters:{
+          q:"",
+          status:"",
+          channel:"",
+          from:"",
+          to:"",
+          sort:"createdAt_desc",
+          page:1,
+          pageSize:10
+        },
+        editingId:null,
+        assetsTempCount:0
+      };
+
+      // Helpers
+      const slugify = (str="") =>
+        str.toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+           .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+
+      const fmt = new Intl.NumberFormat("pt-BR");
+      const fmtMoney = new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"});
+      const asPercent = (n) => isFinite(n) ? (n*100).toFixed(1)+"%" : "0%";
+
+      function nowISO(){ return new Date().toISOString(); }
+      function toISODate(s){
+        if(!s) return "";
+        const d = new Date(s);
+        if (Number.isNaN(d.getTime())) return "";
+        return d.toISOString().slice(0,10);
+      }
+
+      // Toasts
+      function toast(msg, type="success", timeout=2800){
+        const t = $("#toast");
+        const item = document.createElement("div");
+        item.className = "item " + type;
+        item.innerHTML = `<div style="font-weight:600">${type==="success"?"Sucesso":"Aviso"}</div><div>${msg}</div>`;
+        t.appendChild(item);
+        const id = setTimeout(()=> {
+          item.style.opacity = "0";
+          item.style.transform = "translateY(6px)";
+          setTimeout(()=> item.remove(), 200);
+        }, timeout);
+        item.addEventListener("click", ()=>{ clearTimeout(id); item.remove(); });
+      }
+
+      // Persistência
+      function loadCampaigns(){
+        try {
+          const raw = localStorage.getItem(CONFIG.storage.campaigns);
+          if (!raw) return [];
+          const arr = JSON.parse(raw);
+          return Array.isArray(arr) ? arr : [];
+        } catch { return []; }
+      }
+      function saveCampaigns(){
+        try {
+          localStorage.setItem(CONFIG.storage.campaigns, JSON.stringify(state.campaigns));
+        } catch {}
+      }
+
+      // Semente inicial (caso vazio)
+      function seedIfEmpty(){
+        if (state.campaigns.length) return;
+        const demo = [
+          {
+            id: crypto.randomUUID(),
+            name:"Independência VIP",
+            slug:"independencia-vip",
+            status:"ativa",
+            channel:"instagram",
+            owner:"Ana",
+            budget:800,
+            start:"2025-08-20",
+            end:"2025-09-07",
+            desc:"Campanha principal com foco em reels e directs.",
+            tags:["vip","reels","lotofacil"],
+            utm:"utm_source=ig&utm_medium=reels&utm_campaign=indep",
+            target:300,
+            price:12,
+            public:true,
+            assets:2,
+            metrics:{leads:210, sales:86, conv: 86/210, createdAt: nowISO()}
+          },
+          {
+            id: crypto.randomUUID(),
+            name:"WhatsApp Lista A",
+            slug:"whatsapp-lista-a",
+            status:"pausada",
+            channel:"whatsapp",
+            owner:"Bruno",
+            budget:300,
+            start:"2025-08-22",
+            end:"2025-09-06",
+            desc:"Disparo segmentado lista A. Em pausa para ajuste de copy.",
+            tags:["whatsapp","listaA"],
+            utm:"utm_source=wa&utm_medium=broadcast&utm_campaign=lfa",
+            target:150,
+            price:12,
+            public:false,
+            assets:0,
+            metrics:{leads:95, sales:25, conv: 25/95, createdAt: nowISO()}
+          },
+          {
+            id: crypto.randomUUID(),
+            name:"Site Banner Home",
+            slug:"site-banner-home",
+            status:"encerrada",
+            channel:"site",
+            owner:"Clara",
+            budget:1200,
+            start:"2025-08-10",
+            end:"2025-08-28",
+            desc:"Banner na home + pop-up com UTM distinta.",
+            tags:["site","banner"],
+            utm:"utm_source=site&utm_medium=banner&utm_campaign=indep",
+            target:500,
+            price:12,
+            public:true,
+            assets:1,
+            metrics:{leads:520, sales:140, conv: 140/520, createdAt: nowISO()}
+          }
+        ];
+        state.campaigns = demo;
+        saveCampaigns();
+      }
+
+      // Autenticação básica (gate)
+      function requireAuth(){
+        const token = localStorage.getItem(CONFIG.storage.adminToken);
+        if (!token) {
+          window.location.href = CONFIG.routes.login;
+          return false;
+        }
+        state.authToken = token;
+        return true;
+      }
+
+      // Filtros
+      function applyFilters(){
+        const { q, status, channel, from, to, sort } = state.filters;
+        const qnorm = q.trim().toLowerCase();
+        let arr = state.campaigns.slice();
+
+        if (qnorm) {
+          arr = arr.filter(c => {
+            const tags = (c.tags||[]).join(",");
+            return [c.name, c.slug, c.owner, c.desc, tags].some(v => (v||"").toLowerCase().includes(qnorm));
+          });
+        }
+        if (status) arr = arr.filter(c => c.status === status);
+        if (channel) arr = arr.filter(c => c.channel === channel);
+        if (from) {
+          const f = new Date(from);
+          arr = arr.filter(c => new Date(c.start || c.metrics?.createdAt || 0) >= f);
+        }
+        if (to) {
+          const t = new Date(to + "T23:59:59");
+          arr = arr.filter(c => new Date(c.end || c.metrics?.createdAt || 0) <= t);
+        }
+
+        // Ordenação
+        arr.sort((a,b)=>{
+          switch(sort){
+            case "createdAt_asc":
+              return new Date(a.metrics?.createdAt||0) - new Date(b.metrics?.createdAt||0);
+            case "createdAt_desc":
+              return new Date(b.metrics?.createdAt||0) - new Date(a.metrics?.createdAt||0);
+            case "name_asc":
+              return (a.name||"").localeCompare(b.name||"");
+            case "name_desc":
+              return (b.name||"").localeCompare(a.name||"");
+            case "conv_desc":
+              return (b.metrics?.conv||0) - (a.metrics?.conv||0);
+            case "leads_desc":
+              return (b.metrics?.leads||0) - (a.metrics?.leads||0);
+            default:
+              return 0;
+          }
+        });
+
+        state.filtered = arr;
+
+        // KPIs
+        $("#kpiTotal").textContent = arr.length.toString();
+        $("#kpiAtivas").textContent = arr.filter(c=>c.status==="ativa").length.toString();
+        $("#kpiPausadas").textContent = arr.filter(c=>c.status==="pausada").length.toString();
+        $("#kpiEncerradas").textContent = arr.filter(c=>c.status==="encerrada").length.toString();
+      }
+
+      function paginate(){
+        const { page, pageSize } = state.filters;
+        const total = state.filtered.length;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        const p = Math.min(Math.max(1, page), totalPages);
+        state.filters.page = p;
+        const start = (p-1)*pageSize;
+        const items = state.filtered.slice(start, start+pageSize);
+        $("#pageInfo").textContent = `Página ${p} de ${totalPages}`;
+        $("#prevPageBtn").disabled = (p<=1);
+        $("#nextPageBtn").disabled = (p>=totalPages);
+        return items;
+      }
+
+      // Renderização
+      function renderList(){
+        const list = $("#list");
+        list.innerHTML = "";
+        const items = paginate();
+        $("#empty").hidden = items.length > 0;
+
+        items.forEach(c => {
+          const row = document.createElement("div");
+          row.className = "trow";
+          row.setAttribute("role","row");
+          row.dataset.id = c.id;
+
+          // checkbox
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.ariaLabel = `Selecionar ${c.name}`;
+          cb.checked = state.selection.has(c.id);
+          cb.addEventListener("change", ()=>{
+            if (cb.checked) state.selection.add(c.id);
+            else state.selection.delete(c.id);
+            updateSelectionUI();
+          });
+          const cbWrap = document.createElement("div");
+          cbWrap.appendChild(cb);
+
+          // nome + slug
+          const name = document.createElement("div");
+          name.className = "name";
+          name.innerHTML = `
+            <div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <b>${escapeHTML(c.name)}</b>
+                ${c.public ? '<span class="badge success">Pública</span>' : '<span class="badge">Privada</span>'}
+              </div>
+              <div class="muted" style="font-size:12px">${escapeHTML(c.slug)} • ${escapeHTML(c.owner||"—")}</div>
+            </div>`;
+
+          // status
+          const st = document.createElement("div");
+          const cls = c.status==="ativa" ? "success" : (c.status==="pausada"?"warn":"danger");
+          st.className = "col-hide-sm";
+          st.innerHTML = `<span class="badge ${cls}"><span class="status-dot status-${c.status}"></span>${c.status}</span>`;
+
+          // canal
+          const ch = document.createElement("div");
+          ch.className = "col-hide-sm";
+          ch.innerHTML = `<span class="badge">${escapeHTML(c.channel)}</span>`;
+
+          // leads
+          const ld = document.createElement("div");
+          ld.className = "col-hide-md";
+          ld.textContent = fmt.format(c.metrics?.leads||0);
+
+          // vendas/apostas
+          const sl = document.createElement("div");
+          sl.className = "col-hide-md";
+          sl.textContent = fmt.format(c.metrics?.sales||0);
+
+          // conversão
+          const cv = document.createElement("div");
+          cv.className = "col-hide-sm";
+          cv.textContent = asPercent(c.metrics?.conv||0);
+
+          // ações
+          const actions = document.createElement("div");
+          actions.className = "actions";
+          actions.innerHTML = `
+            <button class="btn small" data-act="edit">Editar</button>
+            <button class="btn small" data-act="dup">Duplicar</button>
+            ${c.status!=="encerrada" ? `<button class="btn small ${c.status==="pausada"?"":"warn"}" data-act="toggle">${c.status==="pausada"?"Ativar":"Pausar"}</button>` : ""}
+            <button class="btn small danger" data-act="del">Excluir</button>
+          `;
+          actions.addEventListener("click", (e)=>{
+            const b = e.target.closest("button");
+            if (!b) return;
+            const act = b.dataset.act;
+            switch(act){
+              case "edit": openEdit(c.id); break;
+              case "dup": duplicateCampaign(c.id); break;
+              case "toggle": toggleStatus(c.id); break;
+              case "del": confirmDelete([c.id]); break;
+            }
+          });
+
+          row.append(cbWrap, name, st, ch, ld, sl, cv, actions);
+          list.appendChild(row);
+        });
+      }
+
+      function updateSelectionUI(){
+        $("#selectionCount").textContent = `${state.selection.size} selecionadas`;
+        const allIds = paginate().map(i=>i.id);
+        const allChecked = allIds.length>0 && allIds.every(id => state.selection.has(id));
+        $("#selectAll").checked = allChecked;
+      }
+
+      function updateFiltersUI(){
+        $("#q").value = state.filters.q;
+        $("#status").value = state.filters.status;
+        $("#channel").value = state.filters.channel;
+        $("#from").value = state.filters.from;
+        $("#to").value = state.filters.to;
+        $("#sort").value = state.filters.sort;
+        $("#pageSize").value = String(state.filters.pageSize);
+      }
+
+      // Ações de linha
+      function toggleStatus(id){
+        const c = state.campaigns.find(x=>x.id===id);
+        if (!c) return;
+        if (c.status==="encerrada") { toast("Campanha encerrada não pode ser reativada.", "danger"); return; }
+        c.status = (c.status==="pausada") ? "ativa" : "pausada";
+        saveCampaigns();
+        applyFilters(); renderList();
+        toast(`Campanha ${c.status==="ativa"?"ativada":"pausada"}.`);
+      }
+
+      function duplicateCampaign(id){
+        const c = state.campaigns.find(x=>x.id===id);
+        if (!c) return;
+        const copy = { ...c, id: crypto.randomUUID(), name: c.name + " (cópia)", slug: uniqueSlug(c.slug + "-copia"), metrics:{...c.metrics, createdAt: nowISO(), leads:0, sales:0, conv:0} };
+        state.campaigns.unshift(copy);
+        saveCampaigns();
+        applyFilters(); renderList();
+        toast("Campanha duplicada.");
+      }
+
+      function confirmDelete(ids){
+        const dlg = $("#confirmModal");
+        $("#confirmTitle").textContent = "Excluir campanha(s)";
+        $("#confirmMsg").textContent = ids.length>1
+          ? `Tem certeza que deseja excluir ${ids.length} campanhas? Esta ação não pode ser desfeita.`
+          : "Tem certeza que deseja excluir esta campanha? Esta ação não pode ser desfeita.";
+        dlg.returnValue = "cancel";
+        dlg.showModal();
+        dlg.addEventListener("close", ()=>{
+          if (dlg.returnValue === "confirm") {
+            // remove
+            state.campaigns = state.campaigns.filter(c=>!ids.includes(c.id));
+            ids.forEach(id=> state.selection.delete(id));
+            saveCampaigns();
+            applyFilters(); renderList(); updateSelectionUI();
+            toast("Exclusão concluída.");
+          }
+        }, { once:true });
+      }
+
+      // CRUD
+      function newCampaign(){
+        state.editingId = null;
+        state.assetsTempCount = 0;
+        fillForm({
+          name:"", slug:"", status:"ativa", channel:"instagram",
+          owner:"", budget:"", start:"", end:"", desc:"", tags:[], utm:"",
+          target:"", price:"", public:true
+        });
+        $("#campaignModalTitle").textContent = "Nova campanha";
+        $("#campaignModal").showModal();
+      }
+
+      function openEdit(id){
+        const c = state.campaigns.find(x=>x.id===id);
+        if (!c) return;
+        state.editingId = id;
+        state.assetsTempCount = c.assets||0;
+        fillForm(c);
+        $("#campaignModalTitle").textContent = "Editar campanha";
+        $("#campaignModal").showModal();
+      }
+
+      function fillForm(c){
+        $("#f_name").value = c.name||"";
+        $("#f_slug").value = c.slug||"";
+        $("#f_status").value = c.status||"ativa";
+        $("#f_channel").value = c.channel||"instagram";
+        $("#f_owner").value = c.owner||"";
+        $("#f_budget").value = c.budget!=null ? String(c.budget) : "";
+        $("#f_start").value = toISODate(c.start)||"";
+        $("#f_end").value = toISODate(c.end)||"";
+        $("#f_desc").value = c.desc||"";
+        $("#f_tags").value = (c.tags||[]).join(", ");
+        $("#f_target").value = c.target!=null ? String(c.target) : "";
+        $("#f_price").value = c.price!=null ? String(c.price) : "";
+        $("#f_utm").value = c.utm||"";
+        $("#f_public").checked = !!c.public;
+        $("#mockAssetCount").textContent = `${state.assetsTempCount} arquivos`;
+      }
+
+      function getFormData(){
+        const name = $("#f_name").value.trim();
+        let slug = $("#f_slug").value.trim() || slugify(name);
+        slug = uniqueSlug(slug, state.editingId);
+        const status = $("#f_status").value;
+        const channel = $("#f_channel").value;
+        const owner = $("#f_owner").value.trim();
+        const budget = parseFloat(($("#f_budget").value||"").replace(",","."));
+        const start = $("#f_start").value || "";
+        const end = $("#f_end").value || "";
+        const desc = $("#f_desc").value.trim();
+        const tags = $("#f_tags").value.split(",").map(s=>s.trim()).filter(Boolean);
+        const target = parseInt($("#f_target").value) || 0;
+        const price = parseFloat(($("#f_price").value||"").replace(",",".")) || 0;
+        const utm = $("#f_utm").value.trim();
+        const isPublic = $("#f_public").checked;
+        const assets = state.assetsTempCount||0;
+
+        if (!name) throw new Error("Informe o nome da campanha.");
+        if (!slug) throw new Error("Informe ou gere um slug válido.");
+        if (end && start && new Date(end) < new Date(start)) throw new Error("A data de término não pode ser anterior ao início.");
+
+        return {
+          name, slug, status, channel, owner,
+          budget: isFinite(budget) ? budget : null,
+          start, end, desc, tags, target, price, utm, public:isPublic, assets
+        };
+      }
+
+      function uniqueSlug(slug, editingId=null){
+        let s = slugify(slug);
+        const exists = (check) => state.campaigns.some(c => c.slug === check && c.id !== editingId);
+        if (!exists(s)) return s;
+        let i=2;
+        while (exists(`${s}-${i}`)) i++;
+        return `${s}-${i}`;
+      }
+
+      function saveFromForm(){
+        try {
+          const data = getFormData();
+          if (state.editingId){
+            const idx = state.campaigns.findIndex(c=>c.id===state.editingId);
+            if (idx>-1){
+              state.campaigns[idx] = {
+                ...state.campaigns[idx],
+                ...data
+              };
+            }
+            toast("Campanha atualizada.");
+          } else {
+            state.campaigns.unshift({
+              id: crypto.randomUUID(),
+              ...data,
+              metrics:{ leads:0, sales:0, conv:0, createdAt: nowISO() }
+            });
+            toast("Campanha criada.");
+          }
+          saveCampaigns();
+          applyFilters(); renderList();
+          $("#campaignModal").close();
+        } catch (e){
+          toast(e.message || "Erro ao salvar.", "danger", 3800);
+        }
+      }
+
+      // Export / Import
+      function exportCSV(){
+        const headers = ["name","slug","status","channel","start","end","budget","owner","public","target","price","utm","tags","leads","sales","conv"];
+        const rows = state.filtered.map(c => [
+          safeCSV(c.name), safeCSV(c.slug), c.status, c.channel,
+          c.start||"", c.end||"", c.budget!=null?String(c.budget):"",
+          c.owner||"", c.public?"1":"0", c.target||"", c.price||"",
+          c.utm||"", (c.tags||[]).join("|"),
+          c.metrics?.leads||0, c.metrics?.sales||0, (c.metrics?.conv||0).toFixed(4)
+        ].join(","));
+        const csv = [headers.join(","), ...rows].join("\n");
+        const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "campanhas.csv";
+        a.click();
+        setTimeout(()=> URL.revokeObjectURL(a.href), 500);
+        toast("CSV exportado.");
+      }
+
+      function safeCSV(s){
+        const v = (s==null ? "" : String(s));
+        if (/[",\n]/.test(v)) return `"${v.replace(/"/g,'""')}"`;
+        return v;
+      }
+
+      function openImport(){
+        $("#csvInput").value = "";
+        $("#importModal").showModal();
+      }
+
+      function confirmImport(){
+        const raw = $("#csvInput").value.trim();
+        if (!raw) { toast("Cole os dados CSV.", "danger"); return; }
+        const lines = raw.split(/\r?\n/).filter(Boolean);
+        if (!lines.length){ toast("CSV vazio.", "danger"); return; }
+        const header = lines.shift().toLowerCase();
+        const cols = header.split(",").map(s=>s.trim());
+        const getIdx = (k)=> cols.indexOf(k);
+        const idx = {
+          name:getIdx("name"), slug:getIdx("slug"), status:getIdx("status"),
+          channel:getIdx("channel"), start:getIdx("start"), end:getIdx("end"), budget:getIdx("budget")
+        };
+        if (idx.name<0 || idx.slug<0){ toast("CSV deve conter colunas: name, slug pelo menos.", "danger", 4200); return; }
+        let imported = 0;
+        for (const line of lines){
+          const parts = parseCsvLine(line);
+          const name = parts[idx.name]||"";
+          let slug = uniqueSlug(parts[idx.slug]||slugify(name));
+          const status = parts[idx.status]||"ativa";
+          const channel = parts[idx.channel]||"outros";
+          const start = parts[idx.start]||"";
+          const end = parts[idx.end]||"";
+          const budget = parseFloat((parts[idx.budget]||"").replace(",","."));
+          if (!name || !slug) continue;
+          state.campaigns.push({
+            id: crypto.randomUUID(), name, slug, status, channel, start, end,
+            budget: isFinite(budget)?budget:null,
+            owner:"", desc:"", tags:[], utm:"", target:0, price:0, public:false, assets:0,
+            metrics:{leads:0, sales:0, conv:0, createdAt: nowISO()}
+          });
+          imported++;
+        }
+        saveCampaigns();
+        applyFilters(); renderList();
+        $("#importModal").close();
+        toast(`${imported} campanha(s) importada(s).`);
+      }
+
+      function parseCsvLine(line){
+        const out = [];
+        let cur = "";
+        let inQ = false;
+        for (let i=0;i<line.length;i++){
+          const ch = line[i];
+          if (inQ){
+            if (ch === '"'){
+              if (line[i+1] === '"'){ cur += '"'; i++; }
+              else { inQ = false; }
+            } else cur += ch;
+          } else {
+            if (ch === '"') inQ = true;
+            else if (ch === ','){ out.push(cur); cur = ""; }
+            else cur += ch;
+          }
+        }
+        out.push(cur);
+        return out.map(s=>s.trim());
+      }
+
+      // Seleção em massa
+      function bulkSetStatus(ids, status){
+        let changed = 0;
+        ids.forEach(id=>{
+          const c = state.campaigns.find(x=>x.id===id);
+          if (!c) return;
+          if (c.status==="encerrada" && status!=="encerrada") return;
+          if (c.status!==status) { c.status = status; changed++; }
+        });
+        if (changed){
+          saveCampaigns();
+          applyFilters(); renderList(); updateSelectionUI();
+          toast(`Atualizadas ${changed} campanha(s).`);
+        }
+      }
+
+      // Navegação
+      function bindNav(){
+        $("#goDashboard").addEventListener("click", (e)=>{ e.preventDefault(); window.location.href = CONFIG.routes.dashboard; });
+        $("#logoutBtn").addEventListener("click", ()=>{
+          localStorage.removeItem(CONFIG.storage.adminToken);
+          window.location.href = CONFIG.routes.login;
+        });
+      }
+
+      // UI Handlers
+      function bindFilters(){
+        $("#q").addEventListener("input", debounce(250, (e)=>{ state.filters.q = e.target.value; state.filters.page=1; applyFilters(); renderList(); }));
+        $("#status").addEventListener("change", (e)=>{ state.filters.status = e.target.value; state.filters.page=1; applyFilters(); renderList(); });
+        $("#channel").addEventListener("change", (e)=>{ state.filters.channel = e.target.value; state.filters.page=1; applyFilters(); renderList(); });
+        $("#from").addEventListener("change", (e)=>{ state.filters.from = e.target.value; state.filters.page=1; applyFilters(); renderList(); });
+        $("#to").addEventListener("change", (e)=>{ state.filters.to = e.target.value; state.filters.page=1; applyFilters(); renderList(); });
+        $("#sort").addEventListener("change", (e)=>{ state.filters.sort = e.target.value; applyFilters(); renderList(); });
+        $("#pageSize").addEventListener("change", (e)=>{ state.filters.pageSize = parseInt(e.target.value)||10; state.filters.page=1; renderList(); updateSelectionUI(); });
+        $("#prevPageBtn").addEventListener("click", ()=>{ state.filters.page = Math.max(1, state.filters.page-1); renderList(); updateSelectionUI(); });
+        $("#nextPageBtn").addEventListener("click", ()=>{ state.filters.page = state.filters.page+1; renderList(); updateSelectionUI(); });
+        $("#clearFiltersBtn").addEventListener("click", ()=>{
+          state.filters = { q:"", status:"", channel:"", from:"", to:"", sort:"createdAt_desc", page:1, pageSize: state.filters.pageSize };
+          updateFiltersUI(); applyFilters(); renderList(); updateSelectionUI();
+        });
+        $("#applyFiltersBtn").addEventListener("click", ()=>{ applyFilters(); renderList(); updateSelectionUI(); });
+        $("#selectAll").addEventListener("change", (e)=>{
+          const ids = paginate().map(i=>i.id);
+          if (e.target.checked){ ids.forEach(id=> state.selection.add(id)); }
+          else { ids.forEach(id=> state.selection.delete(id)); }
+          updateSelectionUI();
+          renderList();
+        });
+      }
+
+      function bindToolbar(){
+        $("#newCampaignBtn").addEventListener("click", newCampaign);
+        $("#exportCsvBtn").addEventListener("click", exportCSV);
+        $("#importBtn").addEventListener("click", openImport);
+        $("#bulkActivateBtn").addEventListener("click", ()=> bulkSetStatus([...state.selection], "ativa"));
+        $("#bulkPauseBtn").addEventListener("click", ()=> bulkSetStatus([...state.selection], "pausada"));
+        $("#bulkCloseBtn").addEventListener("click", ()=> bulkSetStatus([...state.selection], "encerrada"));
+        $("#bulkDeleteBtn").addEventListener("click", ()=> {
+          if (!state.selection.size) { toast("Selecione uma ou mais campanhas.", "danger"); return; }
+          confirmDelete([...state.selection]);
+        });
+      }
+
+      function bindModals(){
+        const modal = $("#campaignModal");
+        $("#f_name").addEventListener("input", (e)=>{
+          const val = e.target.value;
+          if (!$("#f_slug").value) $("#f_slug").value = slugify(val);
+        });
+        $("#mockUploadBtn").addEventListener("click", ()=>{
+          state.assetsTempCount++;
+          $("#mockAssetCount").textContent = `${state.assetsTempCount} arquivos`;
+          toast("Arquivo simulado adicionado.");
+        });
+        $("#saveCampaignBtn").addEventListener("click", (e)=>{ e.preventDefault(); saveFromForm(); });
+        modal.addEventListener("close", ()=>{ state.editingId = null; });
+        const importModal = $("#importModal");
+        $("#confirmImport").addEventListener("click", (e)=>{ e.preventDefault(); confirmImport(); });
+      }
+
+      // Util
+      function debounce(ms, fn){
+        let t; return (...args)=>{ clearTimeout(t); t = setTimeout(()=> fn(...args), ms); };
+      }
+      function escapeHTML(s){
+        return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      }
+
+      // Inicialização
+      function init(){
+        if (!requireAuth()) return;
+        bindNav();
+        bindFilters();
+        bindToolbar();
+        bindModals();
+
+        state.campaigns = loadCampaigns();
+        seedIfEmpty();
+
+        updateFiltersUI();
+        applyFilters();
+        renderList();
+        updateSelectionUI();
+      }
+
+      // Eventos globais de teclado (acessibilidade)
+      document.addEventListener("keydown", (e)=>{
+        if (e.key==="n" && (e.ctrlKey||e.metaKey)){ e.preventDefault(); newCampaign(); }
+        if (e.key==="f" && (e.ctrlKey||e.metaKey)){ e.preventDefault(); $("#q").focus(); }
+        if (e.key==="Escape"){
+          const open = $$("dialog[open]");
+          open.forEach(d=> d.close());
+        }
+      });
+
+      // Excluir selecionadas com confirmação
+      function deleteSelected(){
+        if (!state.selection.size){ toast("Nada selecionado.", "danger"); return; }
+        confirmDelete([...state.selection]);
+      }
+
+      // Acesso público (chips/indicações)
+      (function setEnvChip(){
+        const chip = $("#envChip");
+        if (chip) chip.title = "Sessão autenticada";
+      })();
+
+      // Exposição limitada para debug (opcional)
+      window.facilCampaigns = {
+        list: ()=> JSON.parse(JSON.stringify(state.campaigns)),
+        clear: ()=> { state.campaigns=[]; saveCampaigns(); applyFilters(); renderList(); }
+      };
+
+    })();
+  </script>
+</body>
+</html>
