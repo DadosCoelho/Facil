@@ -1,4 +1,4 @@
-// app/admin/campaigns/page.tsx
+// Facil/app/admin/campaigns/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -49,7 +49,7 @@ export default function AdminCampaignsPage() {
     setCreating(true)
     try {
       const newCampaign = await createCampaign({ name: 'Nova Campanha', slug: '', status: 'paused' } as any)
-      // After create, reload list and navigate to edit
+      // Após criar, recarrega a lista e navega para a edição da nova campanha
       await loadCampaigns()
       if (newCampaign && newCampaign.id) {
         router.push(`/admin/campaigns/edit/${newCampaign.id}`)
@@ -73,14 +73,23 @@ export default function AdminCampaignsPage() {
 
   async function handleSetActive(id: string) {
     try {
-      // mark selected campaign as active and others paused
+      // Marca a campanha selecionada como ativa e as outras como pausadas
+      // (Isso assume que a lógica de backend garante que apenas uma campanha esteja ativa por vez,
+      // ou que 'active' é apenas um status para esta campanha específica)
       await updateCampaign(id as any, { status: 'active' } as any)
       await loadCampaigns()
       sessionStorage.setItem('selectedCampaignId', id)
+      router.push('/admin') // Redireciona para o dashboard após ativar a campanha
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar')
     }
   }
+
+  // NOVA função para lidar com o clique no cartão da campanha para visualizar seu dashboard
+  const handleViewDashboard = (campaignId: string) => {
+    sessionStorage.setItem('selectedCampaignId', campaignId); // Salva o ID da campanha na sessão
+    router.push('/admin'); // Redireciona para o dashboard
+  };
 
   if (loading) {
     return (
@@ -121,19 +130,41 @@ export default function AdminCampaignsPage() {
           )}
 
           {campaigns.map(c => (
-            <div key={c.id} className="card p-4 flex items-center justify-between">
+            // Torna o cartão inteiro clicável para ver o dashboard da campanha
+            <div
+              key={c.id}
+              className="card p-4 flex items-center justify-between cursor-pointer hover:border-primary transition-colors" // Adicionado estilo para indicar que é clicável
+              onClick={() => handleViewDashboard(c.id)} // Handler para visualizar o dashboard
+            >
               <div>
                 <div className="font-semibold">{c.name}</div>
                 <div className="text-sm text-muted">ID: {c.id} • Status: {c.status || 'paused'}</div>
               </div>
               <div className="flex items-center gap-2">
-                <button title="Selecionar como ativa" onClick={() => handleSetActive(c.id)} className="btn btn-ghost">
+                <button
+                  title="Selecionar como ativa"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Impede que o clique no botão acione o clique do cartão
+                    handleSetActive(c.id);
+                  }}
+                  className="btn btn-ghost"
+                >
                   <Check className="w-4 h-4" />
                 </button>
-                <Link href={`/admin/campaigns/edit/${c.id}`} className="btn btn-ghost">
+                <Link
+                  href={`/admin/campaigns/edit/${c.id}`}
+                  onClick={(e) => e.stopPropagation()} // Impede que o clique no link acione o clique do cartão
+                  className="btn btn-ghost"
+                >
                   <Edit className="w-4 h-4" />
                 </Link>
-                <button onClick={() => handleDelete(c.id)} className="btn btn-ghost text-error">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Impede que o clique no botão acione o clique do cartão
+                    handleDelete(c.id);
+                  }}
+                  className="btn btn-ghost text-error"
+                >
                   <Trash className="w-4 h-4" />
                 </button>
               </div>
