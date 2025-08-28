@@ -16,7 +16,6 @@
     "autoprefixer": "^10.0.1",
     "clsx": "^2.0.0",
     "firebase": "^12.1.0",
-    "googleapis": "^128.0.0",
     "jose": "^5.0.0",
     "lucide-react": "^0.294.0",
     "next": "14.0.0",
@@ -28,7 +27,6 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
-    "@types/google-apps-script": "^1.0.0",
     "eslint": "^8",
     "eslint-config-next": "14.0.0",
     "prettier": "^3.0.0"
