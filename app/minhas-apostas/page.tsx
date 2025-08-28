@@ -14,10 +14,11 @@ import {
   Calendar,
   Hash
 } from 'lucide-react'
+import { Campaign } from '@/types/Campaign'; // NOVO: Importar Campaign type
 
 interface Bet {
-  id: string // Transaction ID ou Bet ID
-  numbers: number[] // AGORA É SEMPRE number[]
+  id: string 
+  numbers: number[] 
   shares: number
   createdAt: string
   status: 'active' | 'cancelled' | string
@@ -27,7 +28,7 @@ interface Bet {
 interface ParticipantData {
   inviteToken: string
   participantName: string
-  campaignName: string
+  campaignName: string // Agora pode ser o nome real da campanha
   totalBets: number
   totalShares: number
 }
@@ -48,11 +49,30 @@ export default function MinhasApostasPage() {
     try {
       const token = sessionStorage.getItem('inviteToken')
       const name = sessionStorage.getItem('participantName')
-      const inviteId = sessionStorage.getItem('inviteId'); // Obter o inviteId da sessão
-
-      if (!token || !inviteId) {
+      const inviteId = sessionStorage.getItem('inviteId'); 
+      const campaignId = sessionStorage.getItem('campaignId'); // NOVO: Pega campaignId da sessão
+      
+      if (!token || !inviteId || !campaignId) { // campaignId agora é obrigatório
         router.push('/')
         return
+      }
+
+      let fetchedCampaignName = 'Lotofácil da Independência'; // Fallback
+      try {
+          // Fetch campaign details to get the actual name
+          const campaignRes = await fetch(`/api/invites/validate`, { // Reutiliza a validação do token
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: token }),
+          });
+          if (campaignRes.ok) {
+              const campaignData = await campaignRes.json();
+              if (campaignData && campaignData.campaignDetails && campaignData.campaignDetails.name) {
+                  fetchedCampaignName = campaignData.campaignDetails.name;
+              }
+          }
+      } catch (campaignErr) {
+          console.warn('Could not fetch campaign name from API:', campaignErr);
       }
 
       // Chamar a API de leitura de apostas pelo inviteId
@@ -68,26 +88,21 @@ export default function MinhasApostasPage() {
           throw new Error('Falha ao carregar suas apostas.');
       }
 
-      const data = await response.json(); // Espera { bets: [...] }
-
-      // Mapear os dados recebidos da API para o formato esperado
-      // AQUI ESTÁ A MUDANÇA CRÍTICA: bet.numbers já vem como array
+      const data = await response.json(); 
+      
       const loadedBets: Bet[] = data.bets.map((bet: any) => ({
-          id: bet.id, // O Firebase armazena o ID dentro do objeto
-          numbers: bet.numbers, // <-- NÃO PRECISA MAIS DE .split().map(Number)
+          id: bet.id, 
+          numbers: bet.numbers, 
           shares: bet.shares,
           createdAt: bet.createdAt,
           status: bet.status,
           campaignId: bet.campaignId,
       }));
-
-      // Acessa campaignName do primeiro item de loadedBets, que agora contém campaignId
-      const campaignName = loadedBets.length > 0 ? loadedBets[0].campaignId : 'Lotofácil da Independência';
-
+      
       const participantInfo: ParticipantData = {
           inviteToken: token,
           participantName: name || 'Participante',
-          campaignName: campaignName,
+          campaignName: fetchedCampaignName, // Usa o nome da campanha obtido
           totalBets: loadedBets.length,
           totalShares: loadedBets.reduce((sum: number, bet: Bet) => sum + bet.shares, 0)
       }
@@ -96,7 +111,6 @@ export default function MinhasApostasPage() {
       setBets(loadedBets);
 
     } catch (err) {
-      // Aqui o erro 'bet.numbers.split is not a function' será capturado
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados.')
     } finally {
       setLoading(false)
@@ -132,7 +146,7 @@ APOSTAS:
 ${bets.map((bet, index) => `
 ${index + 1}. ID: ${bet.id}
    Data: ${new Date(bet.createdAt).toLocaleString('pt-BR')}
-   Números: ${bet.numbers.map(n => n.toString().padStart(2, '0')).join(' ')} // Ajustado para array
+   Números: ${bet.numbers.map(n => n.toString().padStart(2, '0')).join(' ')} 
    Cotas: ${bet.shares}
    Status: ${bet.status === 'active' ? 'Ativo' : bet.status}
 `).join('')}
@@ -162,13 +176,13 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
     )
   }
 
-  if (!participantData && !error) {
+  if (!participantData && !error) { // Removendo o loading extra aqui
     return (
         <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted">Carregando dados do participante...</p>
-          </div>
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted">Carregando dados do participante...</p>
+            </div>
         </div>
     );
   }
@@ -328,7 +342,7 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
                     </div>
 
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {bet.numbers.map((num) => ( // Ajustado para iterar diretamente sobre o array
+                      {bet.numbers.map((num) => ( 
                         <span
                           key={num}
                           className="w-8 h-8 rounded-lg text-sm flex items-center justify-center bg-primary/20 text-primary font-medium"
@@ -340,7 +354,7 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
 
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted">
-                        {bet.numbers.length} números selecionados {/* Agora sempre usa .length */}
+                        {bet.numbers.length} números selecionados 
                       </span>
                       <span className="font-semibold text-primary">
                         {bet.shares} cota{bet.shares > 1 ? 's' : ''}

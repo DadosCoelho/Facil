@@ -1,3 +1,4 @@
+// app/admin/login/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -21,31 +22,39 @@ export default function AdminLoginPage() {
   const router = useRouter()
 
   useEffect(() => {
-    console.log('NEXT_PUBLIC_ADMIN_USER:', process.env.NEXT_PUBLIC_ADMIN_USER);
-    console.log('NEXT_PUBLIC_ADMIN_PASSWORD:', process.env.NEXT_PUBLIC_ADMIN_PASSWORD);
+    // console.log('NEXT_PUBLIC_ADMIN_USER:', process.env.NEXT_PUBLIC_ADMIN_USER);
+    // console.log('NEXT_PUBLIC_ADMIN_PASSWORD:', process.env.NEXT_PUBLIC_ADMIN_PASSWORD);
   }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
     // Validação usando variáveis de ambiente definidas
     if (email === process.env.NEXT_PUBLIC_ADMIN_USER && password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-      // Persist session for dashboard guard
       try {
         sessionStorage.setItem('adminToken', 'dev-admin-token');
         sessionStorage.setItem('adminEmail', email);
-      } catch {}
-      console.log('Login successful, redirecting to /admin');
-      router.push('/admin');
+        setSuccess(true);
+        // NOVO: Redirecionar para a página de seleção de campanha
+        router.push('/admin/campaigns'); // Altera esta linha
+      } catch (err) {
+        setError('Erro ao salvar sessão. Tente novamente.');
+        setLoading(false);
+      }
     } else {
       setError('Credenciais inválidas.');
+      setLoading(false);
     }
   }
 
   if (success) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="card p-8 max-w-md mx-auto text-center">
+        <div className="text-center">
           <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">Login Realizado!</h1>
           <p className="text-muted mb-6">
@@ -174,7 +183,7 @@ export default function AdminLoginPage() {
               <div className="text-sm">
                 <p className="font-medium text-primary mb-1">Segurança</p>
                 <p className="text-muted">
-                  Esta área é restrita a administradores autorizados. Todas as ações são registradas 
+                  Esta área é restrita a administradores autorizados. Todas as ações são registradas
                   para auditoria e segurança.
                 </p>
               </div>

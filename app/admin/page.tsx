@@ -1,3 +1,4 @@
+// app/admin/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -13,7 +14,8 @@ import {
   Activity,
   Calendar,
   LogOut,
-  AlertCircle
+  AlertCircle,
+  Eye, // NOVO: Para ver campanhas
 } from 'lucide-react'
 
 interface DashboardStats {
@@ -22,6 +24,7 @@ interface DashboardStats {
   totalParticipants: number
   recentBets: number
   campaignStatus: 'active' | 'paused' | 'ended'
+  campaignName: string; // NOVO: Nome da campanha ativa
   lastUpdate: string
 }
 
@@ -30,12 +33,28 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [adminEmail, setAdminEmail] = useState<string>('')
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null); // NOVO
   const router = useRouter()
 
   useEffect(() => {
-    checkAuth()
-    loadDashboardData()
-  }, [])
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    // Carrega dados do dashboard sempre que selectedCampaignId muda
+    if (selectedCampaignId) {
+      loadDashboardData(selectedCampaignId);
+    } else {
+      // Se nenhuma campanha selecionada, tenta carregar uma padrão ou pede para selecionar
+      const storedSelectedCampaignId = sessionStorage.getItem('selectedCampaignId');
+      if (storedSelectedCampaignId) {
+        setSelectedCampaignId(storedSelectedCampaignId);
+      } else {
+        // Se nenhuma campanha selecionada e nenhuma no sessionStorage, redireciona para seleção de campanha
+        router.push('/admin/campaigns');
+      }
+    }
+  }, [selectedCampaignId, router]); // Dependência em selectedCampaignId
 
   const checkAuth = () => {
     const token = sessionStorage.getItem('adminToken')
@@ -49,9 +68,11 @@ export default function AdminDashboardPage() {
     setAdminEmail(email)
   }
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (campaignId: string) => { // Agora aceita campaignId
+    setLoading(true);
+    setError(null);
     try {
-      const response = await fetch('/api/admin/dashboard', {
+      const response = await fetch(`/api/admin/dashboard?campaignId=${campaignId}`, { // Passa campaignId
         headers: {
           'Authorization': `Bearer ${sessionStorage.getItem('adminToken')}`
         }
@@ -61,6 +82,7 @@ export default function AdminDashboardPage() {
         if (response.status === 401) {
           sessionStorage.removeItem('adminToken')
           sessionStorage.removeItem('adminEmail')
+          sessionStorage.removeItem('selectedCampaignId'); // Limpa também
           router.push('/admin/login')
           return
         }
@@ -79,6 +101,7 @@ export default function AdminDashboardPage() {
   const handleLogout = () => {
     sessionStorage.removeItem('adminToken')
     sessionStorage.removeItem('adminEmail')
+    sessionStorage.removeItem('selectedCampaignId'); // Limpa campanha selecionada
     router.push('/admin/login')
   }
 
@@ -100,9 +123,14 @@ export default function AdminDashboardPage() {
           <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">Erro ao Carregar</h1>
           <p className="text-muted mb-6">{error}</p>
-          <button onClick={loadDashboardData} className="btn btn-primary">
+          <button onClick={() => loadDashboardData(selectedCampaignId!)} className="btn btn-primary"> {/* Usa selectedCampaignId */}
             Tentar Novamente
           </button>
+          <div className="mt-4">
+            <Link href="/admin/campaigns" className="btn btn-ghost">
+              <Eye className="w-4 h-4" /> Gerenciar Campanhas
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -124,8 +152,8 @@ export default function AdminDashboardPage() {
               <span className="text-sm text-muted">
                 {adminEmail}
               </span>
-              <button
-                onClick={handleLogout}
+              <button 
+                onClick={handleLogout} 
                 className="btn btn-ghost text-error hover:text-error/80"
                 title="Sair"
               >
@@ -142,8 +170,31 @@ export default function AdminDashboardPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
           <p className="text-muted">
-            Visão geral da campanha e estatísticas das apostas
+            Visão geral da campanha <span className="font-semibold text-primary">{stats.campaignName}</span> e estatísticas das apostas
           </p>
+        </div>
+
+        {/* Campaign Status */}
+        <div className="card p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Status da Campanha</h2>
+              <span className={`badge ${
+                stats.campaignStatus === 'active' ? 'ok' : 
+                stats.campaignStatus === 'paused' ? 'warn' : 'err'
+              }`}>
+                {stats.campaignStatus === 'active' ? 'Ativa' : 
+                 stats.campaignStatus === 'paused' ? 'Pausada' : 'Encerrada'}
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-muted">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>Última atualização: {new Date(stats.lastUpdate).toLocaleString('pt-BR')}</span>
+              </div>
+            </div>
+            <div className="mt-4 text-sm text-muted">
+                Você está visualizando a campanha: <span className="font-bold text-foreground">{stats.campaignName}</span> (ID: {selectedCampaignId})
+            </div>
         </div>
 
         {/* Stats Grid */}
@@ -197,28 +248,21 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Campaign Status */}
-        <div className="card p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Status da Campanha</h2>
-            <span className={`badge ${
-              stats.campaignStatus === 'active' ? 'ok' : 
-              stats.campaignStatus === 'paused' ? 'warn' : 'err'
-            }`}>
-              {stats.campaignStatus === 'active' ? 'Ativa' : 
-               stats.campaignStatus === 'paused' ? 'Pausada' : 'Encerrada'}
-            </span>
-          </div>
-          <div className="flex items-center gap-4 text-sm text-muted">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span>Última atualização: {new Date(stats.lastUpdate).toLocaleString('pt-BR')}</span>
-            </div>
-          </div>
-        </div>
-
+        
         {/* Quick Actions */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <Link href="/admin/campaigns" className="card p-6 hover:border-primary transition-colors group">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <Eye className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Gerenciar Campanhas</h3>
+                  <p className="text-sm text-muted">Criar, editar e selecionar campanhas</p>
+                </div>
+              </div>
+            </Link>
+
           <Link href="/admin/convites" className="card p-6 hover:border-primary transition-colors group">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -230,7 +274,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           </Link>
-
+          
           <Link href="/admin/apostas" className="card p-6 hover:border-primary transition-colors group">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -243,20 +287,21 @@ export default function AdminDashboardPage() {
             </div>
           </Link>
 
-          <Link href="/admin/configuracoes" className="card p-6 hover:border-primary transition-colors group">
+          {/* Este link irá para as configurações específicas da campanha *selecionada* */}
+          <Link href={`/admin/campaigns/edit/${selectedCampaignId}`} className="card p-6 hover:border-primary transition-colors group">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <Settings className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Configurações</h3>
-                <p className="text-sm text-muted">Ajustar parâmetros do sistema</p>
+                <h3 className="font-semibold mb-1">Configurações da Campanha</h3>
+                <p className="text-sm text-muted">Ajustar parâmetros da campanha selecionada</p>
               </div>
             </div>
           </Link>
         </div>
-
-        {/* Recent Activity */}
+        
+        {/* Recent Activity (mocked as before) */}
         <div className="card p-6">
           <h2 className="text-xl font-semibold mb-4">Atividade Recente</h2>
           <div className="space-y-3">
@@ -286,6 +331,10 @@ export default function AdminDashboardPage() {
 
         {/* Navigation Links */}
         <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/admin/campaigns" className="btn btn-ghost py-3 flex items-center justify-center gap-2">
+                <Eye className="w-4 h-4" />
+                Gerenciar Campanhas
+            </Link>
           <Link href="/admin/convites" className="btn btn-ghost py-3 flex items-center justify-center gap-2">
             <Plus className="w-4 h-4" />
             Convites
@@ -294,14 +343,11 @@ export default function AdminDashboardPage() {
             <FileText className="w-4 h-4" />
             Apostas
           </Link>
-          <Link href="/admin/campanhas" className="btn btn-ghost py-3 flex items-center justify-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            Campanhas
-          </Link>
-          <Link href="/admin/configuracoes" className="btn btn-ghost py-3 flex items-center justify-center gap-2">
-            <Settings className="w-4 h-4" />
-            Configurações
-          </Link>
+            {/* Link direto para configurações da campanha selecionada */}
+            <Link href={`/admin/campaigns/edit/${selectedCampaignId}`} className="btn btn-ghost py-3 flex items-center justify-center gap-2">
+              <Settings className="w-4 h-4" />
+              Configurações da Campanha
+            </Link>
         </div>
       </main>
     </div>

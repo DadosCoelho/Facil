@@ -1,11 +1,32 @@
 // lib/jwt.ts
 import crypto from 'crypto';
 
+// Helper function for base64url encoding (needed for signing)
+function base64UrlEncode(input: Buffer | string): string {
+    const buf = Buffer.isBuffer(input) ? input : Buffer.from(input);
+    return buf.toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
 function base64UrlDecode(input: string) {
     input = input.replace(/-/g, '+').replace(/_/g, '/');
     const pad = input.length % 4;
     if (pad) input += '='.repeat(4 - pad);
     return Buffer.from(input, 'base64');
+}
+
+/**
+ * Assina um payload para criar um token JWT.
+ * @param payload O objeto de dados a ser incluído no token.
+ * @param secret A chave secreta para assinar o token.
+ * @returns O token JWT assinado.
+ */
+export function sign(payload: object, secret: string): string { // NOVO: exportar a função sign
+    const header = { alg: 'HS256', typ: 'JWT' };
+    const encodedHeader = base64UrlEncode(JSON.stringify(header));
+    const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+    const data = `${encodedHeader}.${encodedPayload}`;
+    const signature = crypto.createHmac('sha256', secret).update(data).digest();
+    return `${data}.${base64UrlEncode(signature)}`;
 }
 
 /**

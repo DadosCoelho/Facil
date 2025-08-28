@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, AlertCircle, ArrowRight } from 'lucide-react'
+import { Campaign } from '@/types/Campaign'; // NOVO: Importar Campaign type
 
 interface InviteData {
   campaignId: string
@@ -16,6 +17,7 @@ interface InviteData {
     email?: string
   }
   inviteId: string;
+  campaignDetails: Campaign; // NOVO: Detalhes completos da campanha
 }
 
 export default function InvitePage({ params }: { params: { token: string } }) {
@@ -41,7 +43,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
       })
 
       if (!response.ok) {
-        throw new Error('Convite inválido ou expirado.')
+        throw new Error('Convite inválido ou expirado. Ou campanha não está ativa.'); // Mensagem mais abrangente
       }
 
       const data: InviteData = await response.json()
@@ -65,19 +67,16 @@ export default function InvitePage({ params }: { params: { token: string } }) {
 
       const { hasBets } = await checkStatusResponse.json();
 
-      if (hasBets) {
-        // MUITO IMPORTANTE: Popular o sessionStorage ANTES de redirecionar
-        // Isso garante que 'minhas-apostas' tenha os dados para buscar as apostas no Firebase
-        sessionStorage.setItem('inviteToken', params.token);
-        sessionStorage.setItem('inviteId', data.inviteId);
-        sessionStorage.setItem('participantName', data.participant?.name || '');
-        sessionStorage.setItem('campaignId', data.campaignId); // Opcional, se 'minhas-apostas' precisar da campanha
+      // MUITO IMPORTANTE: Popular o sessionStorage ANTES de redirecionar
+      // Isso garante que 'minhas-apostas' e 'aposta/nova' tenham os dados necessários
+      sessionStorage.setItem('inviteToken', params.token);
+      sessionStorage.setItem('inviteId', data.inviteId);
+      sessionStorage.setItem('participantName', data.participant?.name || '');
+      sessionStorage.setItem('campaignId', data.campaignId); // NOVO: Salva o campaignId
 
-        // Se já houver apostas, redireciona para "Minhas Apostas"
+      if (hasBets) {
         router.push('/minhas-apostas');
-        setLoading(false); // Definir loading como false aqui para não mostrar tela vazia antes do redirect
       } else {
-        // Se não houver apostas, permite que o usuário prossiga para criar novas
         setLoading(false); // Apenas define loading como false se não redirecionar
       }
 
@@ -89,14 +88,9 @@ export default function InvitePage({ params }: { params: { token: string } }) {
 
   const handleStart = () => {
     if (!acceptedTerms) return
-
-    // Salvar dados da sessão (necessário para novos usuários que não tinham apostas prévias)
-    sessionStorage.setItem('inviteToken', params.token)
-    sessionStorage.setItem('participantName', participantName)
-    sessionStorage.setItem('campaignId', inviteData?.campaignId || '')
-    sessionStorage.setItem('inviteId', inviteData?.inviteId || ''); // Garantir que inviteId seja salvo aqui também
-
-    // Redirecionar para criação de aposta
+    
+    // Os dados já devem estar no sessionStorage devido ao checkStatusResponse acima.
+    // Apenas redireciona.
     router.push('/aposta/nova')
   }
 
@@ -230,7 +224,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
           <div className="card p-6">
             <h3 className="font-semibold mb-3">Como Funciona:</h3>
             <ol className="list-decimal list-inside space-y-2 text-sm text-muted">
-              <li>Selecione de 15 a 20 números (1-25)</li>
+              <li>Selecione de {inviteData.campaignDetails.numbersPerBet} números (1-25)</li> {/* NOVO: Dinâmico */}
               <li>Defina a quantidade de cotas para cada jogo</li>
               <li>Revise e confirme suas apostas</li>
               <li>Receba confirmação do envio</li>

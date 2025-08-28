@@ -13,6 +13,7 @@ import {
   Send, 
   Plus 
 } from 'lucide-react'
+import { Campaign } from '@/types/Campaign'; // NOVO: Importar Campaign type
 
 interface Bet {
   id: string
@@ -22,7 +23,7 @@ interface Bet {
 
 export default function RevisaoPage() {
   const [bets, setBets] = useState<Bet[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true) // Alterado para true
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false) 
   const [inviteToken, setInviteToken] = useState<string | null>(null)
@@ -37,6 +38,7 @@ export default function RevisaoPage() {
   useEffect(() => {
     const token = sessionStorage.getItem('inviteToken')
     const name = sessionStorage.getItem('participantName')
+    const campaignId = sessionStorage.getItem('campaignId'); // NOVO: Pega o campaignId do sessionStorage
 
     if (!token) {
       router.push('/')
@@ -55,15 +57,35 @@ export default function RevisaoPage() {
     setInviteToken(token)
     setParticipantName(name || '')
 
-    fetch('/api/admin/config')
-      .then(r => r.json())
-      .then(cfg => {
-        setPricePerShare(cfg?.pricePerShare ?? 0)
-        setPixKey(cfg?.pixKey ?? '')
-        setPixInstructions(cfg?.pixInstructions ?? '')
-      })
+    // NOVO: Carregar configurações da campanha específica do convite
+    if (campaignId) {
+        fetch(`/api/invites/validate`, { // Revalida o token para pegar as config da campanha
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: token }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.campaignDetails) {
+                const campaignConfig: Campaign = data.campaignDetails; // Adapta para Campaign
+                setPricePerShare(campaignConfig.pricePerShare ?? 0);
+                setPixKey(campaignConfig.pixKey ?? '');
+                setPixInstructions(campaignConfig.pixInstructions ?? '');
+            } else {
+                setError('Não foi possível carregar as configurações da campanha.');
+            }
+        })
+        .catch(err => {
+            console.error('Erro ao carregar configurações da campanha:', err);
+            setError('Erro ao carregar configurações da campanha.');
+        })
+        .finally(() => setLoading(false)); // Finaliza o loading após tentar buscar as configs
+    } else {
+        setError('ID da campanha não encontrado na sessão.');
+        setLoading(false); // Finaliza o loading com erro
+    }
   }, [router])
-
+  
   const removeBet = (betId: string) => {
     const newBets = bets.filter(bet => bet.id !== betId)
     setBets(newBets)
@@ -117,22 +139,19 @@ export default function RevisaoPage() {
 
       const result = await response.json() // { transactionId, status: 'processing', message: '...' }
 
-      // PREPARAR TODOS OS DADOS DA TRANSAÇÃO PARA A PÁGINA DE CONFIRMAÇÃO
       const fullTransactionData = {
         transactionId: result.transactionId,
-        bets: bets, // As apostas reais que foram enviadas
+        bets: bets, 
         totalShares: bets.reduce((sum, bet) => sum + bet.shares, 0),
-        participantName: participantName, // Nome do participante do estado do frontend
-        campaignName: 'Lotofácil da Independência', // Pode ser dinâmico da sua config se necessário
+        participantName: participantName, 
+        campaignName: 'Lotofácil da Independência', // Idealmente viria da campanha
         createdAt: new Date().toISOString(),
       };
 
-      // Armazenar TODOS os dados necessários na sessionStorage para a página de confirmação
       sessionStorage.setItem('lastTransactionData', JSON.stringify(fullTransactionData));
-      sessionStorage.removeItem('pendingBets'); // Limpar as apostas pendentes
+      sessionStorage.removeItem('pendingBets'); 
 
       setSuccess(true) 
-      // Redireciona imediatamente para a página de confirmação
       router.push(`/aposta/confirmacao/${result.transactionId}`)
 
     } catch (err) {
@@ -146,15 +165,28 @@ export default function RevisaoPage() {
     router.push('/aposta/nova')
   }
 
-  if (!inviteToken) {
+  if (loading) { // NOVO: Estado de loading inicial
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted">Carregando...</p>
+          <p className="text-muted">Carregando configurações da campanha...</p>
         </div>
       </div>
     )
+  }
+
+  if (error && !inviteToken) { // Mostrar erro se não houver token ou erro grave no carregamento inicial
+    return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="card p-8 max-w-md mx-auto text-center">
+                <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
+                <h1 className="text-2xl font-bold mb-4">Erro de Acesso</h1>
+                <p className="text-muted mb-6">{error}</p>
+                <Link href="/" className="btn btn-primary">Voltar ao Início</Link>
+            </div>
+        </div>
+    );
   }
 
   if (success) {
@@ -313,7 +345,6 @@ export default function RevisaoPage() {
                       </button>
                     </div>
                   )}
-                  {/* NOVO: Checkbox de confirmação de pagamento */}
                   <div className="mt-4">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input

@@ -1,3 +1,4 @@
+// app/aposta/nova/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -11,6 +12,7 @@ import {
   CheckCircle,
   AlertCircle 
 } from 'lucide-react'
+import { Campaign } from '@/types/Campaign'; // NOVO: Importar Campaign type
 
 interface Bet {
   id: string
@@ -24,16 +26,16 @@ export default function NovaApostaPage() {
   const [bets, setBets] = useState<Bet[]>([])
   const [numbersPerBet, setNumbersPerBet] = useState<number>(15)
   const [pricePerShare, setPricePerShare] = useState<number>(0)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true) // Alterado para true
   const [error, setError] = useState<string | null>(null)
   const [inviteToken, setInviteToken] = useState<string | null>(null)
   const [participantName, setParticipantName] = useState<string>('')
   const router = useRouter()
 
   useEffect(() => {
-    // Verificar se há token válido na sessão
     const token = sessionStorage.getItem('inviteToken')
     const name = sessionStorage.getItem('participantName')
+    const campaignId = sessionStorage.getItem('campaignId'); // NOVO: Pega o campaignId do sessionStorage
     
     if (!token) {
       router.push('/')
@@ -42,6 +44,7 @@ export default function NovaApostaPage() {
     
     setInviteToken(token)
     setParticipantName(name || '')
+
     // Carregar jogos já pendentes da sessão (se houver)
     const existingBets = sessionStorage.getItem('pendingBets')
     if (existingBets) {
@@ -52,15 +55,36 @@ export default function NovaApostaPage() {
         }
       } catch {}
     }
-    // Carregar config
-    fetch('/api/admin/config')
-      .then(r=>r.json())
-      .then(cfg=>{
-        setNumbersPerBet(cfg?.numbersPerBet ?? 15)
-        setPricePerShare(cfg?.pricePerShare ?? 0)
-      })
-  }, [router])
 
+    // NOVO: Carregar configurações da campanha específica do convite
+    if (campaignId) {
+        fetch(`/api/invites/validate`, { // Revalida o token para pegar as config da campanha
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: token }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.campaignDetails) {
+                const campaignConfig: Campaign = data.campaignDetails; // Adapta para Campaign
+                setNumbersPerBet(campaignConfig.numbersPerBet ?? 15);
+                setPricePerShare(campaignConfig.pricePerShare ?? 0);
+            } else {
+                setError('Não foi possível carregar as configurações da campanha.');
+            }
+        })
+        .catch(err => {
+            console.error('Erro ao carregar configurações da campanha:', err);
+            setError('Erro ao carregar configurações da campanha.');
+        })
+        .finally(() => setLoading(false)); // Finaliza o loading após tentar buscar as configs
+    } else {
+        setError('ID da campanha não encontrado na sessão.');
+        setLoading(false); // Finaliza o loading com erro
+    }
+
+  }, [router])
+  
   const toggleNumber = (number: number) => {
     if (selectedNumbers.includes(number)) {
       setSelectedNumbers(selectedNumbers.filter(n => n !== number))
@@ -68,7 +92,7 @@ export default function NovaApostaPage() {
       setSelectedNumbers([...selectedNumbers, number].sort((a, b) => a - b))
     }
   }
-
+  
   const addBet = () => {
     if (selectedNumbers.length !== numbersPerBet) {
       setError(`Selecione exatamente ${numbersPerBet} números`)
@@ -88,7 +112,6 @@ export default function NovaApostaPage() {
 
     const updated = [...bets, newBet]
     setBets(updated)
-    // Persistir imediatamente para não perder ao voltar para revisão
     try {
       sessionStorage.setItem('pendingBets', JSON.stringify(updated))
     } catch {}
@@ -122,20 +145,32 @@ export default function NovaApostaPage() {
       return
     }
     
-    // Salvar apostas na sessão
     sessionStorage.setItem('pendingBets', JSON.stringify(bets))
     router.push('/aposta/revisao')
   }
 
-  if (!inviteToken) {
+  if (loading) { // NOVO: Estado de loading inicial
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted">Carregando...</p>
+          <p className="text-muted">Carregando configurações da campanha...</p>
         </div>
       </div>
     )
+  }
+
+  if (error && !inviteToken) { // Mostrar erro se não houver token ou erro grave no carregamento inicial
+    return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="card p-8 max-w-md mx-auto text-center">
+                <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
+                <h1 className="text-2xl font-bold mb-4">Erro de Acesso</h1>
+                <p className="text-muted mb-6">{error}</p>
+                <Link href="/" className="btn btn-primary">Voltar ao Início</Link>
+            </div>
+        </div>
+    );
   }
 
   return (

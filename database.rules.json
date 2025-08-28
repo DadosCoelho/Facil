@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "bets": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "campaigns": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    ".read": false,
+    ".write": false
+  }
+}

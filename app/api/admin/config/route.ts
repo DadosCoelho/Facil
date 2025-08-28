@@ -1,42 +1,93 @@
-'use server'
+// app/api/admin/config/route.ts
+'use server';
 
-import { NextResponse } from 'next/server'
-import { getConfig, updateConfig, type AppConfig, type CampaignStatus } from '@/lib/config-store'
+import { NextResponse } from 'next/server';
+import { ensureAdmin, unauthorizedResponse } from '@/lib/auth';
+import { getCampaignById, updateCampaign, getAllCampaigns } from '@/lib/firebase-db'; // NOVO: Funções de campanha
+import { Campaign } from '@/types/Campaign'; // NOVO: Importar tipo Campaign
 
-function ensureAdmin(request: Request) {
-	const authHeader = request.headers.get('authorization') || request.headers.get('Authorization')
-	if (!authHeader || !authHeader.toLowerCase().startsWith('bearer ')) return false
-	const token = authHeader.split(' ')[1]
-	return token === 'dev-admin-token'
-}
+export async function GET(request: Request) {
+  if (!ensureAdmin(request)) {
+    return unauthorizedResponse();
+  }
 
-export async function GET() {
-	return NextResponse.json(getConfig())
+  const url = new URL(request.url);
+  const campaignId = url.searchParams.get('campaignId');
+  let campaign: Campaign | null = null;
+
+  if (campaignId) {
+    campaign = await getCampaignById(campaignId);
+  } else {
+    // Se nenhum campaignId específico, tenta encontrar uma ativa ou a primeira disponível
+    const allCampaigns = await getAllCampaigns();
+    campaign = allCampaigns.find(c => c.status === 'active') || allCampaigns[0] || null;
+  }
+
+  if (!campaign) {
+    return NextResponse.json({ message: 'Nenhuma campanha encontrada ou selecionada' }, { status: 404 });
+  }
+
+  // Adapta o objeto Campaign para a estrutura esperada (similar ao antigo AppConfig)
+  const appConfigResponse = {
+    campaignId: campaign.id,
+    campaignName: campaign.name,
+    status: campaign.status,
+    updatedAt: campaign.updatedAt,
+    pricePerShare: campaign.pricePerShare,
+    numbersPerBet: campaign.numbersPerBet,
+    pixKey: campaign.pixKey,
+    pixInstructions: campaign.pixInstructions,
+    // Novos campos da campanha que podem ser expostos se necessário
+    minSharesPerBet: campaign.minSharesPerBet,
+    maxSharesPerBet: campaign.maxSharesPerBet,
+    singleUseInvitesDefault: campaign.singleUseInvitesDefault,
+    inviteExpirationDaysDefault: campaign.inviteExpirationDaysDefault,
+  };
+
+  return NextResponse.json(appConfigResponse);
 }
 
 export async function POST(request: Request) {
-	if (!ensureAdmin(request)) return NextResponse.json({ message: 'Não autorizado' }, { status: 401 })
-	let body: Partial<AppConfig>
-	try {
-		body = await request.json()
-	} catch {
-		return NextResponse.json({ message: 'JSON inválido' }, { status: 400 })
-	}
+  if (!ensureAdmin(request)) {
+    return unauthorizedResponse();
+  }
 
-	if (body.status && !['active','paused','ended'].includes(body.status as CampaignStatus)) {
-		return NextResponse.json({ message: 'Status inválido' }, { status: 400 })
-	}
+  const url = new URL(request.url);
+  const campaignId = url.searchParams.get('campaignId'); // Espera campaignId para atualização
+  if (!campaignId) {
+    return NextResponse.json({ message: 'ID da campanha ausente para atualização' }, { status: 400 });
+  }
 
-	const updated = updateConfig({
-		campaignId: body.campaignId,
-		campaignName: body.campaignName,
-		status: body.status as CampaignStatus | undefined,
-		pricePerShare: typeof body.pricePerShare === 'number' ? body.pricePerShare : undefined,
-		numbersPerBet: typeof body.numbersPerBet === 'number' ? Math.min(20, Math.max(15, body.numbersPerBet)) : undefined,
-		pixKey: body.pixKey,
-		pixInstructions: body.pixInstructions,
-	})
-	return NextResponse.json(updated)
+  let body: Partial<Omit<Campaign, 'id' | 'createdAt'>>;
+  try {
+    body = await request.json();
+    if (body.status && !['active','paused','ended'].includes(body.status as any)) {
+      return NextResponse.json({ message: 'Status inválido' }, { status: 400 });
+    }
+  } catch {
+    return NextResponse.json({ message: 'JSON inválido' }, { status: 400 });
+  }
+
+  try {
+    const updated = await updateCampaign(campaignId, body);
+    // Mapeia de volta para a estrutura esperada
+    const appConfigResponse = {
+      campaignId: updated.id,
+      campaignName: updated.name,
+      status: updated.status,
+      updatedAt: updated.updatedAt,
+      pricePerShare: updated.pricePerShare,
+      numbersPerBet: updated.numbersPerBet,
+      pixKey: updated.pixKey,
+      pixInstructions: updated.pixInstructions,
+      minSharesPerBet: updated.minSharesPerBet,
+      maxSharesPerBet: updated.maxSharesPerBet,
+      singleUseInvitesDefault: updated.singleUseInvitesDefault,
+      inviteExpirationDaysDefault: updated.inviteExpirationDaysDefault,
+    };
+    return NextResponse.json(appConfigResponse);
+  } catch (error) {
+    console.error(`Failed to update campaign ${campaignId} config:`, error);
+    return NextResponse.json({ message: 'Erro ao atualizar configuração da campanha' }, { status: 500 });
+  }
 }
-
-
