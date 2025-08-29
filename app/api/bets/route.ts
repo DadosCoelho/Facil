@@ -1,9 +1,7 @@
-// facil/app/api/bets/route.ts
-// Certifique-se de que o 'use server' está no topo do arquivo para Route Handlers
+// Facil/app/api/bets/route.ts
 'use server';
 
 import { NextResponse } from 'next/server';
-// Importa a nova função do Firebase
 import { addBetToFirebase } from '@/lib/firebase-db';
 import { verifyInviteToken } from '@/lib/jwt'; 
 
@@ -37,9 +35,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Nenhuma aposta fornecida.' }, { status: 400 });
     }
 
-    const transactionId = `trans_${Date.now()}`; // Mantém o ID da transação
+    const transactionId = `trans_${Date.now()}`; 
 
-    // Retorna resposta imediata ao cliente
     const response = NextResponse.json({ 
         transactionId, 
         status: 'processing', 
@@ -47,23 +44,25 @@ export async function POST(request: Request) {
         redirectDelay: 2000
     });
 
-    // Executa a operação de salvamento no Firebase em segundo plano
     (async () => {
         try {
             for (const bet of bets) {
                 const betDataToSave = {
-                    id: bet.id || transactionId, // Usa o ID da aposta ou o ID da transação
+                    id: bet.id || transactionId, 
                     numbers: bet.numbers,
                     shares: bet.shares,
                     createdAt: new Date().toISOString(),
-                    status: 'active', // Ou o status que desejar
+                    status: 'active', 
                     campaignId: decodedToken.campaignId || 'DEFAULT_CAMPAIGN_ID',
                     inviteId: decodedToken.inviteId || 'UNKNOWN_INVITE',
                     participantSessionId: decodedToken.inviteId,
-                    // comprovanteUrl: bet.comprovanteUrl || '', // Se você for passar o URL do comprovante aqui
+                    // =========================================================
+                    // NOVO: Adiciona o nome do participante à aposta salva
+                    // =========================================================
+                    participantName: decodedToken.participant?.name || 'Participante Anônimo',
+                    // =========================================================
                 };
 
-                // Chama a nova função do Firebase para adicionar a aposta
                 await addBetToFirebase(betDataToSave);
             }
             console.log(`[BACKGROUND] Processo de salvamento da transação ${transactionId} no Firebase concluído.`);

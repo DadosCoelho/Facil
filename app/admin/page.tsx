@@ -1,4 +1,4 @@
-// app/admin/page.tsx
+// Facil/app/admin/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { 
   BarChart3, 
   Users, 
-  FileText, 
+  FileText, // Ícone de arquivo para "Ver Apostas"
   Settings, 
   Plus,
   TrendingUp,
@@ -15,7 +15,7 @@ import {
   Calendar,
   LogOut,
   AlertCircle,
-  Eye, // NOVO: Para ver campanhas
+  Eye, 
 } from 'lucide-react'
 
 interface DashboardStats {
@@ -24,7 +24,7 @@ interface DashboardStats {
   totalParticipants: number
   recentBets: number
   campaignStatus: 'active' | 'paused' | 'ended'
-  campaignName: string; // NOVO: Nome da campanha ativa
+  campaignName: string;
   lastUpdate: string
 }
 
@@ -33,7 +33,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [adminEmail, setAdminEmail] = useState<string>('')
-  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null); // NOVO
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null); 
   const router = useRouter()
 
   useEffect(() => {
@@ -41,20 +41,17 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
-    // Carrega dados do dashboard sempre que selectedCampaignId muda
     if (selectedCampaignId) {
       loadDashboardData(selectedCampaignId);
     } else {
-      // Se nenhuma campanha selecionada, tenta carregar uma padrão ou pede para selecionar
       const storedSelectedCampaignId = sessionStorage.getItem('selectedCampaignId');
       if (storedSelectedCampaignId) {
         setSelectedCampaignId(storedSelectedCampaignId);
       } else {
-        // Se nenhuma campanha selecionada e nenhuma no sessionStorage, redireciona para seleção de campanha
         router.push('/admin/campaigns');
       }
     }
-  }, [selectedCampaignId, router]); // Dependência em selectedCampaignId
+  }, [selectedCampaignId, router]);
 
   const checkAuth = () => {
     const token = sessionStorage.getItem('adminToken')
@@ -68,11 +65,11 @@ export default function AdminDashboardPage() {
     setAdminEmail(email)
   }
 
-  const loadDashboardData = async (campaignId: string) => { // Agora aceita campaignId
+  const loadDashboardData = async (campaignId: string) => { 
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/admin/dashboard?campaignId=${campaignId}`, { // Passa campaignId
+      const response = await fetch(`/api/admin/dashboard?campaignId=${campaignId}`, { 
         headers: {
           'Authorization': `Bearer ${sessionStorage.getItem('adminToken')}`
         }
@@ -82,7 +79,7 @@ export default function AdminDashboardPage() {
         if (response.status === 401) {
           sessionStorage.removeItem('adminToken')
           sessionStorage.removeItem('adminEmail')
-          sessionStorage.removeItem('selectedCampaignId'); // Limpa também
+          sessionStorage.removeItem('selectedCampaignId'); 
           router.push('/admin/login')
           return
         }
@@ -101,7 +98,7 @@ export default function AdminDashboardPage() {
   const handleLogout = () => {
     sessionStorage.removeItem('adminToken')
     sessionStorage.removeItem('adminEmail')
-    sessionStorage.removeItem('selectedCampaignId'); // Limpa campanha selecionada
+    sessionStorage.removeItem('selectedCampaignId'); 
     router.push('/admin/login')
   }
 
@@ -123,7 +120,7 @@ export default function AdminDashboardPage() {
           <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">Erro ao Carregar</h1>
           <p className="text-muted mb-6">{error}</p>
-          <button onClick={() => loadDashboardData(selectedCampaignId!)} className="btn btn-primary"> {/* Usa selectedCampaignId */}
+          <button onClick={() => loadDashboardData(selectedCampaignId!)} className="btn btn-primary"> 
             Tentar Novamente
           </button>
           <div className="mt-4">
@@ -138,7 +135,6 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -164,9 +160,7 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
           <p className="text-muted">
@@ -174,7 +168,6 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        {/* Campaign Status */}
         <div className="card p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Status da Campanha</h2>
@@ -197,7 +190,6 @@ export default function AdminDashboardPage() {
             </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="card p-6">
             <div className="flex items-center gap-4">
@@ -249,7 +241,6 @@ export default function AdminDashboardPage() {
         </div>
 
         
-        {/* Quick Actions */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <Link href="/admin/campaigns" className="card p-6 hover:border-primary transition-colors group">
               <div className="flex items-center gap-4">
@@ -275,27 +266,17 @@ export default function AdminDashboardPage() {
             </div>
           </Link>
           
-          <Link href="/admin/apostas" className="card p-6 hover:border-primary transition-colors group">
+          {/* ========================================================= */}
+          {/* NOVO: Link para o dashboard público de apostas da campanha */}
+          {/* ========================================================= */}
+          <Link href={`/admin/campaign-bets-dashboard?campaignId=${selectedCampaignId}`} className="card p-6 hover:border-primary transition-colors group">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <FileText className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Ver Apostas</h3>
-                <p className="text-sm text-muted">Acompanhar todas as apostas</p>
-              </div>
-            </div>
-          </Link>
-
-          {/* Este link irá para as configurações específicas da campanha *selecionada* */}
-          <Link href={`/admin/campaigns/edit/${selectedCampaignId}`} className="card p-6 hover:border-primary transition-colors group">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <Settings className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold mb-1">Configurações da Campanha</h3>
-                <p className="text-sm text-muted">Ajustar parâmetros da campanha selecionada</p>
+                <h3 className="font-semibold mb-1">Ver Apostas da Campanha</h3>
+                <p className="text-sm text-muted">Acompanhar todas as apostas registradas</p>
               </div>
             </div>
           </Link>
@@ -339,11 +320,12 @@ export default function AdminDashboardPage() {
             <Plus className="w-4 h-4" />
             Convites
           </Link>
-          <Link href="/admin/apostas" className="btn btn-ghost py-3 flex items-center justify-center gap-2">
+          {/* Re-linking the "Ver Apostas" to the new Campaign Bets Dashboard */}
+          <Link href={`/admin/campaign-bets-dashboard?campaignId=${selectedCampaignId}`} className="btn btn-ghost py-3 flex items-center justify-center gap-2">
             <FileText className="w-4 h-4" />
-            Apostas
+            Ver Apostas da Campanha
           </Link>
-            {/* Link direto para configurações da campanha selecionada */}
+            {/* Link to campaign settings remains */}
             <Link href={`/admin/campaigns/edit/${selectedCampaignId}`} className="btn btn-ghost py-3 flex items-center justify-center gap-2">
               <Settings className="w-4 h-4" />
               Configurações da Campanha

@@ -5,16 +5,14 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
-  ArrowLeft,
-  // Plus, // Removido Plus, pois os botões "Nova Aposta" serão removidos
+  FileText, // Usado para o ícone do botão "Apostas da Campanha"
   Copy,
   Download,
   AlertCircle,
-  FileText,
   Calendar,
   Hash
 } from 'lucide-react'
-import { Campaign } from '@/types/Campaign';
+import { Campaign } from '@/types/Campaign'; // Importação do tipo Campaign
 
 interface Bet {
   id: string 
@@ -23,6 +21,7 @@ interface Bet {
   createdAt: string
   status: 'active' | 'cancelled' | string
   campaignId: string;
+  participantName?: string; // Esperado que venha da BetData agora
 }
 
 interface ParticipantData {
@@ -31,6 +30,7 @@ interface ParticipantData {
   campaignName: string
   totalBets: number
   totalShares: number
+  campaignId: string; // Incluindo campaignId para o link
 }
 
 export default function MinhasApostasPage() {
@@ -57,9 +57,9 @@ export default function MinhasApostasPage() {
         return
       }
 
-      let fetchedCampaignName = 'Lotofácil da Independência';
+      let fetchedCampaignName = 'Lotofácil da Independência'; 
       try {
-          const campaignRes = await fetch(`/api/invites/validate`, {
+          const campaignRes = await fetch(`/api/invites/validate`, { 
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ token: token }),
@@ -95,14 +95,16 @@ export default function MinhasApostasPage() {
           createdAt: bet.createdAt,
           status: bet.status,
           campaignId: bet.campaignId,
+          participantName: bet.participantName, // Garante que o nome seja lido do Firebase
       }));
       
       const participantInfo: ParticipantData = {
           inviteToken: token,
           participantName: name || 'Participante',
-          campaignName: fetchedCampaignName,
+          campaignName: fetchedCampaignName, 
           totalBets: loadedBets.length,
-          totalShares: loadedBets.reduce((sum: number, bet: Bet) => sum + bet.shares, 0)
+          totalShares: loadedBets.reduce((sum: number, bet: Bet) => sum + bet.shares, 0),
+          campaignId: campaignId, 
       }
 
       setParticipantData(participantInfo);
@@ -144,6 +146,7 @@ APOSTAS:
 ${bets.map((bet, index) => `
 ${index + 1}. ID: ${bet.id}
    Data: ${new Date(bet.createdAt).toLocaleString('pt-BR')}
+   Nome: ${bet.participantName || 'Desconhecido'}
    Números: ${bet.numbers.map(n => n.toString().padStart(2, '0')).join(' ')} 
    Cotas: ${bet.shares}
    Status: ${bet.status === 'active' ? 'Ativo' : bet.status}
@@ -214,7 +217,12 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
               </div>
               <h1 className="text-xl font-bold">Facil</h1>
             </Link>
-            {/* BOTÃO "NOVA APOSTA" REMOVIDO DO HEADER */}
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted">
+                Olá, {participantData?.participantName}
+              </span>
+              {/* REMOVIDO: Botão Nova Aposta do header */}
+            </div>
           </div>
         </div>
       </header>
@@ -224,10 +232,17 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
         <div className="max-w-4xl mx-auto">
           {/* Page Header */}
           <div className="flex items-center gap-4 mb-8">
-            <Link href="/aposta/nova" className="btn btn-ghost">
-              <ArrowLeft className="w-4 h-4" />
-              Voltar
-            </Link>
+            {/* NOVO: Botão "Apostas da Campanha" no lugar do "Voltar" */}
+            {participantData?.campaignId && (
+                <Link 
+                    href={`/admin/campaign-bets-dashboard?campaignId=${participantData.campaignId}`} 
+                    className="btn btn-ghost flex items-center justify-center gap-2"
+                >
+                    <FileText className="w-4 h-4" /> 
+                    Apostas da Campanha
+                </Link>
+            )}
+            
             <div>
               <h1 className="text-3xl font-bold">Minhas Apostas</h1>
               <p className="text-muted">Acompanhe todas as suas apostas na campanha</p>
@@ -284,7 +299,7 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
               <p className="text-muted mb-6">
                 Você ainda não criou nenhuma aposta.
               </p>
-              {/* BOTÃO "CRIAR PRIMEIRA APOSTA" REMOVIDO AQUI */}
+              {/* REMOVIDO: Botão Criar Primeira Aposta */}
             </div>
           ) : (
             <>
@@ -359,12 +374,9 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
             </>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-8">
-            <Link href="/" className="btn btn-ghost flex-1 py-4">
-              Voltar ao Início
-            </Link>
-            {/* BOTÃO "CRIAR NOVA APOSTA" REMOVIDO AQUI */}
+          {/* REMOVIDO: Botão Criar Nova Aposta */}
+          <div className="mt-8 text-center">
+            <Link href="/" className="btn btn-primary">Voltar ao Início</Link>
           </div>
         </div>
       </main>

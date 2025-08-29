@@ -1,21 +1,22 @@
-// facil/lib/firebase-db.ts
-// (Mantenha as importações e a interface BetData existentes)
-
+// Facil/lib/firebase-db.ts
 import { ref, push, set, query, orderByChild, equalTo, get, update, remove } from "firebase/database";
-import { database } from "./firebase"; // Importa a instância do database
-import { Campaign, CampaignStatus } from "@/types/Campaign"; // NOVO: Importar a interface Campaign
+import { database } from "./firebase";
+import { Campaign, CampaignStatus } from "@/types/Campaign";
 
-// Definição da interface Bet (ajuste conforme a necessidade, mas baseada na sua)
-export interface BetData { 
-  id: string; // Para usar como chave ou atributo
+// =========================================================
+// ATUALIZADO: Definição da interface BetData com participantName
+// =========================================================
+export interface BetData {
+  id: string;
   numbers: number[];
   shares: number;
   createdAt: string;
   status: 'active' | 'cancelled' | string;
   campaignId: string;
-  inviteId: string; // Importante para buscas
+  inviteId: string;
   participantSessionId?: string;
-  comprovanteUrl?: string; // Para o link do comprovante
+  comprovanteUrl?: string;
+  participantName?: string; // NOVO: Campo para armazenar o nome do participante
 }
 
 /**
@@ -67,20 +68,44 @@ export async function getBetsFromFirebase(inviteId: string): Promise<BetData[]> 
   }
 }
 
-// ==========================================================
-// NOVO: Funções CRUD para Campanhas
-// ==========================================================
+// =========================================================
+// NOVO: Função para buscar todas as apostas de uma campanha
+// =========================================================
+export async function getCampaignBetsFromFirebase(campaignId: string): Promise<BetData[]> {
+  try {
+    const betsQuery = query(
+      ref(database, 'bets'),
+      orderByChild('campaignId'), // Filtra pela campaignId
+      equalTo(campaignId)
+    );
 
-/**
- * Cria uma nova campanha no Firebase Realtime Database.
- * @param campaignData Os dados da campanha a serem salvos (id será gerado se não fornecido).
- * @returns Promise<Campaign> A campanha criada com seu ID.
- */
+    const snapshot = await get(betsQuery);
+
+    if (snapshot.exists()) {
+      const bets: BetData[] = [];
+      snapshot.forEach((childSnapshot) => {
+        bets.push(childSnapshot.val());
+      });
+      console.log(`[Firebase] ${bets.length} apostas encontradas para a campanha ${campaignId}.`);
+      return bets;
+    } else {
+      console.log(`[Firebase] Nenhuma aposta encontrada para a campanha ${campaignId}.`);
+      return [];
+    }
+  } catch (error) {
+    console.error(`[Firebase ERROR] Erro ao buscar apostas da campanha ${campaignId}:`, error);
+    throw new Error('Falha ao buscar apostas da campanha no Firebase.');
+  }
+}
+
+// =========================================================
+// Funções CRUD para Campanhas (sem alteração neste pedido)
+// =========================================================
 export async function createCampaign(campaignData: Omit<Campaign, 'id' | 'createdAt' | 'updatedAt'>): Promise<Campaign> {
-  const newCampaignRef = push(ref(database, 'campaigns')); // Firebase gera um ID único
+  const newCampaignRef = push(ref(database, 'campaigns'));
   const now = new Date().toISOString();
   const campaign: Campaign = {
-    id: newCampaignRef.key!, // O ID gerado pelo Firebase
+    id: newCampaignRef.key!,
     createdAt: now,
     updatedAt: now,
     ...campaignData,
@@ -95,11 +120,6 @@ export async function createCampaign(campaignData: Omit<Campaign, 'id' | 'create
   }
 }
 
-/**
- * Obtém uma campanha pelo seu ID.
- * @param campaignId O ID da campanha.
- * @returns Promise<Campaign | null> A campanha ou null se não encontrada.
- */
 export async function getCampaignById(campaignId: string): Promise<Campaign | null> {
   try {
     const campaignRef = ref(database, `campaigns/${campaignId}`);
@@ -117,10 +137,6 @@ export async function getCampaignById(campaignId: string): Promise<Campaign | nu
   }
 }
 
-/**
- * Obtém todas as campanhas.
- * @returns Promise<Campaign[]> Um array de campanhas.
- */
 export async function getAllCampaigns(): Promise<Campaign[]> {
   try {
     const campaignsRef = ref(database, 'campaigns');
@@ -141,19 +157,12 @@ export async function getAllCampaigns(): Promise<Campaign[]> {
   }
 }
 
-/**
- * Atualiza uma campanha existente.
- * @param campaignId O ID da campanha a ser atualizada.
- * @param updates Os campos a serem atualizados.
- * @returns Promise<Campaign> A campanha atualizada.
- */
 export async function updateCampaign(campaignId: string, updates: Partial<Omit<Campaign, 'id' | 'createdAt'>>): Promise<Campaign> {
   try {
     const campaignRef = ref(database, `campaigns/${campaignId}`);
     const now = new Date().toISOString();
-    await update(campaignRef, { ...updates, updatedAt: now }); // Adiciona updatedAt
-    
-    // Opcional: buscar a campanha atualizada para retornar o objeto completo
+    await update(campaignRef, { ...updates, updatedAt: now });
+
     const updatedCampaign = await getCampaignById(campaignId);
     if (!updatedCampaign) {
       throw new Error('Campanha não encontrada após atualização.');
@@ -166,11 +175,6 @@ export async function updateCampaign(campaignId: string, updates: Partial<Omit<C
   }
 }
 
-/**
- * Remove uma campanha pelo seu ID.
- * @param campaignId O ID da campanha a ser removida.
- * @returns Promise<void>
- */
 export async function deleteCampaign(campaignId: string): Promise<void> {
   try {
     const campaignRef = ref(database, `campaigns/${campaignId}`);
