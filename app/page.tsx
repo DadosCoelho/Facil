@@ -1,20 +1,29 @@
+// Facil/app/page.tsx
+'use client';
+
 import Link from 'next/link'
-import { ArrowRight, Users, Award, Shield } from 'lucide-react'
+import { useState } from 'react';
+import { ArrowRight, Users, Award, Shield, Menu, X } from 'lucide-react'
 
 export default function HomePage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // Estado para controlar a visibilidade do menu móvel
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
+            {/* Logo e Título */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center">
                 <span className="text-background font-bold text-lg">F</span>
               </div>
               <h1 className="text-xl font-bold">Facil</h1>
             </div>
-            <nav className="flex items-center gap-6">
+
+            {/* Navegação Desktop (visível apenas em telas médias e maiores) */}
+            <nav className="hidden md:flex items-center gap-6">
               <Link href="/termos" className="text-muted hover:text-foreground transition-colors">
                 Termos
               </Link>
@@ -25,9 +34,71 @@ export default function HomePage() {
                 Admin
               </Link>
             </nav>
+
+            {/* Botão de Toggle do Menu Mobile (visível apenas em telas pequenas) */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="text-muted hover:text-foreground focus:outline-none"
+                aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
       </header>
+
+      {/* Overlay de Fundo (para fechar o menu ao clicar fora) */}
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" // Adiciona um z-index menor que o do menu
+          onClick={() => setIsMenuOpen(false)}
+        ></div>
+      )}
+
+      {/* Conteúdo do Menu Mobile (Drawer lateral) */}
+      <div
+        className={`
+          fixed top-0 right-0 h-full w-64 bg-card z-50 transform transition-transform duration-300 ease-in-out md:hidden
+          ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}
+          flex flex-col p-6 space-y-6 border-l border-border
+        `}
+      >
+        {/* Botão de Fechar o Menu */}
+        <div className="flex justify-end">
+          <button
+            onClick={() => setIsMenuOpen(false)}
+            className="text-muted hover:text-foreground focus:outline-none"
+            aria-label="Fechar menu"
+          >
+            <X className="w-8 h-8" />
+          </button>
+        </div>
+
+        {/* Links do Menu Mobile */}
+        <Link
+          href="/termos"
+          onClick={() => setIsMenuOpen(false)}
+          className="text-xl text-foreground hover:text-primary transition-colors font-semibold py-2"
+        >
+          Termos
+        </Link>
+        <Link
+          href="/privacidade"
+          onClick={() => setIsMenuOpen(false)}
+          className="text-xl text-foreground hover:text-primary transition-colors font-semibold py-2"
+        >
+          Privacidade
+        </Link>
+        <Link
+          href="/admin"
+          onClick={() => setIsMenuOpen(false)}
+          className="btn btn-primary text-xl py-3 mt-4" // Ajustado tamanho e margem
+        >
+          Admin
+        </Link>
+      </div>
 
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-16">
@@ -40,11 +111,7 @@ export default function HomePage() {
             <span className="text-primary font-semibold"> Lotofácil da Independência</span>
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/admin" className="btn btn-primary text-lg px-8 py-4">
-              Acessar Admin
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link href="/termos" className="btn btn-ghost text-lg px-8 py-4">
+            <Link href="/termos" className="btn btn-primary text-lg px-8 py-4">
               Saiba Mais
             </Link>
           </div>
@@ -78,7 +145,7 @@ export default function HomePage() {
             </div>
             <h3 className="text-xl font-semibold mb-4">Integração Completa</h3>
             <p className="text-muted">
-              Sincronização automática com Google Sheets para auditoria e relatórios
+              Armazenamento seguro em sistema de dados remoto e serviço de arquivos em nuvem para auditoria e relatórios
             </p>
           </div>
         </div>
@@ -113,7 +180,7 @@ export default function HomePage() {
                 4
               </div>
               <h3 className="font-semibold mb-2">Registro Automático</h3>
-              <p className="text-sm text-muted">Dados salvos no Google Sheets</p>
+              <p className="text-sm text-muted">Dados salvos em sistema de dados remoto e comprovantes em serviço de armazenamento em nuvem</p>
             </div>
           </div>
         </div>

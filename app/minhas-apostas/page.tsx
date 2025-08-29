@@ -1,4 +1,4 @@
-// facil/app/minhas-apostas/page.tsx
+// Facil/app/minhas-apostas/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft,
-  Plus,
+  // Plus, // Removido Plus, pois os botões "Nova Aposta" serão removidos
   Copy,
   Download,
   AlertCircle,
@@ -14,7 +14,7 @@ import {
   Calendar,
   Hash
 } from 'lucide-react'
-import { Campaign } from '@/types/Campaign'; // NOVO: Importar Campaign type
+import { Campaign } from '@/types/Campaign';
 
 interface Bet {
   id: string 
@@ -28,7 +28,7 @@ interface Bet {
 interface ParticipantData {
   inviteToken: string
   participantName: string
-  campaignName: string // Agora pode ser o nome real da campanha
+  campaignName: string
   totalBets: number
   totalShares: number
 }
@@ -50,17 +50,16 @@ export default function MinhasApostasPage() {
       const token = sessionStorage.getItem('inviteToken')
       const name = sessionStorage.getItem('participantName')
       const inviteId = sessionStorage.getItem('inviteId'); 
-      const campaignId = sessionStorage.getItem('campaignId'); // NOVO: Pega campaignId da sessão
+      const campaignId = sessionStorage.getItem('campaignId'); 
       
-      if (!token || !inviteId || !campaignId) { // campaignId agora é obrigatório
+      if (!token || !inviteId || !campaignId) {
         router.push('/')
         return
       }
 
-      let fetchedCampaignName = 'Lotofácil da Independência'; // Fallback
+      let fetchedCampaignName = 'Lotofácil da Independência';
       try {
-          // Fetch campaign details to get the actual name
-          const campaignRes = await fetch(`/api/invites/validate`, { // Reutiliza a validação do token
+          const campaignRes = await fetch(`/api/invites/validate`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ token: token }),
@@ -75,7 +74,6 @@ export default function MinhasApostasPage() {
           console.warn('Could not fetch campaign name from API:', campaignErr);
       }
 
-      // Chamar a API de leitura de apostas pelo inviteId
       const response = await fetch(`/api/bets/by-invite-id`, {
           method: 'POST',
           headers: {
@@ -102,7 +100,7 @@ export default function MinhasApostasPage() {
       const participantInfo: ParticipantData = {
           inviteToken: token,
           participantName: name || 'Participante',
-          campaignName: fetchedCampaignName, // Usa o nome da campanha obtido
+          campaignName: fetchedCampaignName,
           totalBets: loadedBets.length,
           totalShares: loadedBets.reduce((sum: number, bet: Bet) => sum + bet.shares, 0)
       }
@@ -176,7 +174,7 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
     )
   }
 
-  if (!participantData && !error) { // Removendo o loading extra aqui
+  if (!participantData && !error) {
     return (
         <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-center">
@@ -216,15 +214,7 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
               </div>
               <h1 className="text-xl font-bold">Facil</h1>
             </Link>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted">
-                Olá, {participantData?.participantName}
-              </span>
-              <Link href="/aposta/nova" className="btn btn-primary">
-                <Plus className="w-4 h-4" />
-                Nova Aposta
-              </Link>
-            </div>
+            {/* BOTÃO "NOVA APOSTA" REMOVIDO DO HEADER */}
           </div>
         </div>
       </header>
@@ -294,10 +284,7 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
               <p className="text-muted mb-6">
                 Você ainda não criou nenhuma aposta.
               </p>
-              <Link href="/aposta/nova" className="btn btn-primary">
-                <Plus className="w-4 h-4" />
-                Criar Primeira Aposta
-              </Link>
+              {/* BOTÃO "CRIAR PRIMEIRA APOSTA" REMOVIDO AQUI */}
             </div>
           ) : (
             <>
@@ -377,13 +364,7 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
             <Link href="/" className="btn btn-ghost flex-1 py-4">
               Voltar ao Início
             </Link>
-            <Link
-              href="/aposta/nova"
-              className="btn btn-primary flex-1 py-4 flex items-center justify-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Criar Nova Aposta
-            </Link>
+            {/* BOTÃO "CRIAR NOVA APOSTA" REMOVIDO AQUI */}
           </div>
         </div>
       </main>
