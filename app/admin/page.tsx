@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { 
   BarChart3, 
   Users, 
-  FileText, // Ícone de arquivo para "Ver Apostas"
+  FileText, 
   Settings, 
   Plus,
   TrendingUp,
@@ -135,6 +135,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -160,14 +161,17 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
           <p className="text-muted">
-            Visão geral da campanha <span className="font-semibold text-primary">{stats.campaignName}</span> e estatísticas das apostas
+            Visão geral da campanha <span className="font-semibold text-primary">{stats.campaignName}</span>
           </p>
         </div>
 
+        {/* Campaign Status */}
         <div className="card p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Status da Campanha</h2>
@@ -190,57 +194,58 @@ export default function AdminDashboardPage() {
             </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted">Total de Apostas</p>
-                <p className="text-2xl font-bold">{stats.totalBets}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted">Total de Cotas</p>
-                <p className="text-2xl font-bold">{stats.totalShares}</p>
+        {/* REMOVIDO: Stats Grid (Total de Apostas, Cotas, Participantes, Recentes) */}
+        {/* <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="card p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted">Total de Apostas</p>
+                  <p className="text-2xl font-bold">{stats.totalBets}</p>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="card p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted">Participantes</p>
-                <p className="text-2xl font-bold">{stats.totalParticipants}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Activity className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted">Apostas Recentes</p>
-                <p className="text-2xl font-bold">{stats.recentBets}</p>
+  
+            <div className="card p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted">Total de Cotas</p>
+                  <p className="text-2xl font-bold">{stats.totalShares}</p>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+  
+            <div className="card p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted">Participantes</p>
+                  <p className="text-2xl font-bold">{stats.totalParticipants}</p>
+                </div>
+              </div>
+            </div>
+  
+            <div className="card p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Activity className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted">Apostas Recentes</p>
+                  <p className="text-2xl font-bold">{stats.recentBets}</p>
+                </div>
+              </div>
+            </div>
+          </div> */}
 
-        
+        {/* Quick Actions (Mantidos) */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <Link href="/admin/campaigns" className="card p-6 hover:border-primary transition-colors group">
               <div className="flex items-center gap-4">
@@ -266,9 +271,6 @@ export default function AdminDashboardPage() {
             </div>
           </Link>
           
-          {/* ========================================================= */}
-          {/* NOVO: Link para o dashboard público de apostas da campanha */}
-          {/* ========================================================= */}
           <Link href={`/admin/campaign-bets-dashboard?campaignId=${selectedCampaignId}`} className="card p-6 hover:border-primary transition-colors group">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -282,7 +284,7 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
         
-        {/* Recent Activity (mocked as before) */}
+        {/* Recent Activity (Mantido) */}
         <div className="card p-6">
           <h2 className="text-xl font-semibold mb-4">Atividade Recente</h2>
           <div className="space-y-3">
@@ -310,8 +312,8 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Navigation Links */}
-        <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* REMOVIDO: Navigation Links (últimos 4 botões) */}
+        {/* <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/admin/campaigns" className="btn btn-ghost py-3 flex items-center justify-center gap-2">
                 <Eye className="w-4 h-4" />
                 Gerenciar Campanhas
@@ -320,17 +322,15 @@ export default function AdminDashboardPage() {
             <Plus className="w-4 h-4" />
             Convites
           </Link>
-          {/* Re-linking the "Ver Apostas" to the new Campaign Bets Dashboard */}
           <Link href={`/admin/campaign-bets-dashboard?campaignId=${selectedCampaignId}`} className="btn btn-ghost py-3 flex items-center justify-center gap-2">
             <FileText className="w-4 h-4" />
             Ver Apostas da Campanha
           </Link>
-            {/* Link to campaign settings remains */}
             <Link href={`/admin/campaigns/edit/${selectedCampaignId}`} className="btn btn-ghost py-3 flex items-center justify-center gap-2">
               <Settings className="w-4 h-4" />
               Configurações da Campanha
             </Link>
-        </div>
+        </div> */}
       </main>
     </div>
   )
