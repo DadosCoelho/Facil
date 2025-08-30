@@ -5,15 +5,17 @@ import { getDatabase } from "firebase/database";
 // Se você for usar Analytics, descomente e inicialize-o
 // import { getAnalytics } from "firebase/analytics";
 
-// Suas configurações do Firebase (as que você já forneceu)
+// Firebase config loaded from environment variables (.env.local).
+// For client-side use in Next.js, prefix with NEXT_PUBLIC_.
+// Example variables are provided in the project's .env.local (local-only).
 const firebaseConfig = {
-  apiKey: "AIzaSyAXvE2dvZFGitt6kkCCl-M6yWYt9CRDoHk",
-  authDomain: "facil-61f9e.firebaseapp.com",
-  projectId: "facil-61f9e",
-  storageBucket: "facil-61f9e.firebasestorage.app",
-  messagingSenderId: "61940625115",
-  appId: "1:61940625115:web:9980f8827a85b5f64766fe",
-  measurementId: "G-HDDEN3BF10"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? '',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? '',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? '',
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? '',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? '',
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? '',
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ?? ''
 };
 
 // Evita a inicialização múltipla do Firebase em ambientes de desenvolvimento
