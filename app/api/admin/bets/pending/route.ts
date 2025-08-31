@@ -3,18 +3,23 @@
 
 import { NextResponse } from 'next/server';
 import { ensureAdmin, unauthorizedResponse } from '@/lib/auth';
-import { getBetsByPaymentStatus } from '@/lib/firebase-db';
+// Mude a importação para a nova função agrupada
+import { getPendingInviteGroupsByCampaign } from '@/lib/firebase-db'; 
 
 export async function GET(request: Request) {
   if (!ensureAdmin(request)) {
     return unauthorizedResponse();
   }
 
+  const url = new URL(request.url);
+  const campaignId = url.searchParams.get('campaignId'); // NOVO: Captura o campaignId do parâmetro de busca
+
   try {
-    const pendingBets = await getBetsByPaymentStatus('pending');
-    return NextResponse.json(pendingBets);
+    // Passa o campaignId para a função do Firebase. Se não for fornecido, a função busca todos os pendentes.
+    const pendingInviteGroups = await getPendingInviteGroupsByCampaign(campaignId || undefined); 
+    return NextResponse.json(pendingInviteGroups);
   } catch (error) {
-    console.error('Erro ao buscar apostas pendentes:', error);
-    return NextResponse.json({ message: 'Erro ao carregar apostas pendentes.' }, { status: 500 });
+    console.error('Erro ao buscar convites pendentes:', error);
+    return NextResponse.json({ message: 'Erro ao carregar convites pendentes.' }, { status: 500 });
   }
 }

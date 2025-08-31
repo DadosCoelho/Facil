@@ -4,7 +4,7 @@
 // IMPORTANTE: Este arquivo DEVE SER IMPORTADO SOMENTE POR CÓDIGOS DE BACKEND (API Routes, Server Components)
 // NUNCA importe este arquivo diretamente em componentes React de cliente (com 'use client').
 
-import admin from 'firebase-admin'; 
+import admin from 'firebase-admin';
 import { ServiceAccount } from 'firebase-admin/app';
 import { Database as AdminDatabaseType, DataSnapshot as AdminDataSnapshot, Query as AdminQueryType } from 'firebase-admin/database';
 import { Campaign, CampaignStatus } from '@/types/Campaign';
@@ -88,10 +88,22 @@ export interface BetData {
   campaignId: string;
   inviteId: string;
   participantSessionId?: string;
-  comprovanteUrl?: string;
+  comprovanteUrl?: string; // Manter este campo, mesmo que não seja usado para upload de imagem, para manter a estrutura de dados existente
   participantName?: string;
   paymentStatus: PaymentStatus;
 }
+
+// NOVO: Interface para o grupo de apostas de um convite na base de dados
+export interface InviteGroupData {
+    inviteId: string;
+    campaignId: string;
+    participantName: string;
+    totalShares: number;
+    bets: BetData[]; // Lista das apostas individuais
+    firstBetCreatedAt: string; // Para ordenação ou exibição
+    paymentStatusOverall: PaymentStatus; // Status geral do convite (ex: 'pending' se qualquer uma for pendente)
+}
+
 
 export async function addBetToFirebase(betData: BetData): Promise<void> {
   try {
@@ -207,6 +219,92 @@ export async function updateBetPaymentStatus(betId: string, newStatus: PaymentSt
     throw new Error('Falha ao atualizar status da aposta no Firebase. Detalhes no log do servidor.');
   }
 }
+
+// NOVO: Função para buscar e agrupar convites pendentes por campanha
+export async function getPendingInviteGroupsByCampaign(campaignIdFilter?: string): Promise<InviteGroupData[]> {
+  try {
+    const db = getAdminDatabaseInstance();
+    const betsRef = db.ref('bets');
+    // Filtra inicialmente por paymentStatus 'pending'
+    const snapshot = await betsRef.orderByChild('paymentStatus').equalTo('pending').once('value');
+
+    const pendingBets: BetData[] = [];
+    if (snapshot.exists()) {
+      snapshot.forEach((child_snapshot) => {
+        const bet = child_snapshot.val() as BetData;
+        // Se um filtro de campanha for fornecido, aplique-o
+        if (!campaignIdFilter || bet.campaignId === campaignIdFilter) {
+          pendingBets.push(bet);
+        }
+      });
+    }
+
+    const inviteGroups: { [key: string]: InviteGroupData } = {};
+
+    pendingBets.forEach(bet => {
+      if (!inviteGroups[bet.inviteId]) {
+        inviteGroups[bet.inviteId] = {
+          inviteId: bet.inviteId,
+          campaignId: bet.campaignId,
+          participantName: bet.participantName || `Participante ${bet.inviteId.substring(0, 4)}...`,
+          totalShares: 0,
+          bets: [],
+          firstBetCreatedAt: bet.createdAt, // Assume a primeira aposta adicionada como referência
+          paymentStatusOverall: 'pending' // Começa como pendente
+        };
+      }
+      inviteGroups[bet.inviteId].bets.push(bet);
+      inviteGroups[bet.inviteId].totalShares += bet.shares;
+      // Garante que o status geral do convite permaneça pendente se alguma aposta for pendente
+      // (embora todas aqui já sejam "pending" pelo filtro inicial)
+      if (bet.paymentStatus === 'pending') {
+          inviteGroups[bet.inviteId].paymentStatusOverall = 'pending';
+      }
+    });
+
+    // Converte o objeto em um array e ordena pela data da primeira aposta (opcional)
+    return Object.values(inviteGroups).sort((a, b) => new Date(a.firstBetCreatedAt).getTime() - new Date(b.firstBetCreatedAt).getTime());
+
+  } catch (error) {
+    console.error(`[Firebase ERROR] Erro ao buscar e agrupar convites pendentes por campanha:`, error);
+    throw new Error('Falha ao buscar e agrupar convites pendentes no Firebase.');
+  }
+}
+
+// NOVO: Função para atualizar o status de pagamento de TODAS as apostas de um invite
+export async function updateBetsPaymentStatusByInvite(inviteId: string, newStatus: PaymentStatus): Promise<void> {
+    console.log(`[Firebase DB] Tentando atualizar todas as apostas do convite ${inviteId} para o status: ${newStatus}.`);
+    try {
+        const db = getAdminDatabaseInstance();
+        const betsQuery = db.ref('bets').orderByChild('inviteId').equalTo(inviteId);
+        const snapshot = await betsQuery.once('value');
+
+        if (snapshot.exists()) {
+            const updates: { [key: string]: any } = {};
+            snapshot.forEach((child_snapshot) => {
+                const betId = child_snapshot.key;
+                if (betId) {
+                    updates[`${betId}/paymentStatus`] = newStatus;
+                    updates[`${betId}/updatedAt`] = new Date().toISOString();
+                }
+            });
+
+            if (Object.keys(updates).length > 0) {
+                // Realiza um update multi-caminho para atualizar todas as apostas relacionadas ao inviteId
+                await db.ref('bets').update(updates);
+                console.log(`[Firebase DB] Todas as apostas do convite ${inviteId} atualizadas para ${newStatus}.`);
+            } else {
+                console.log(`[Firebase DB] Nenhuma aposta encontrada para o convite ${inviteId} para atualizar.`);
+            }
+        } else {
+            console.log(`[Firebase DB] Convite ${inviteId} não encontrado.`);
+        }
+    } catch (error) {
+        console.error(`[Firebase ERROR] Erro crítico ao atualizar status das apostas do convite ${inviteId}:`, error);
+        throw new Error('Falha ao atualizar status das apostas por convite no Firebase. Detalhes no log do servidor.');
+    }
+}
+
 
 export async function createCampaign(campaignData: Omit<Campaign, 'id' | 'createdAt' | 'updatedAt'>): Promise<Campaign> {
   const db = getAdminDatabaseInstance();

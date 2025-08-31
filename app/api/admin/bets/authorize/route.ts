@@ -3,7 +3,8 @@
 
 import { NextResponse } from 'next/server';
 import { ensureAdmin, unauthorizedResponse } from '@/lib/auth';
-import { updateBetPaymentStatus, PaymentStatus } from '@/lib/firebase-db';
+// Mude para a nova função de atualização por invite
+import { updateBetsPaymentStatusByInvite, PaymentStatus } from '@/lib/firebase-db'; 
 
 export async function POST(request: Request) {
   console.log('--- [API: /api/admin/bets/authorize] Início da requisição POST ---');
@@ -15,16 +16,17 @@ export async function POST(request: Request) {
   }
   console.log('[API: authorize] Admin autenticado com sucesso.');
 
-  let body: { betId: string; status: PaymentStatus };
+  // NOVO: Corpo da requisição agora espera inviteId e status
+  let body: { inviteId: string; status: PaymentStatus }; 
   try {
     // 2. Parse do Corpo da Requisição
     body = await request.json();
     console.log('[API: authorize] Corpo da requisição recebido:', body);
 
-    // 3. Validação do Corpo da Requisição
-    if (!body.betId || !['approved', 'rejected'].includes(body.status)) {
+    // 3. Validação do Corpo da Requisição (agora para inviteId)
+    if (!body.inviteId || !['approved', 'rejected'].includes(body.status)) { 
       console.warn('[API: authorize] Dados inválidos no corpo da requisição:', body);
-      return NextResponse.json({ message: 'ID da aposta ou status inválido.' }, { status: 400 });
+      return NextResponse.json({ message: 'ID do convite ou status inválido.' }, { status: 400 });
     }
   } catch (parseError) {
     console.error('[API: authorize] Erro ao fazer parse do JSON ou dados ausentes:', parseError);
@@ -32,18 +34,19 @@ export async function POST(request: Request) {
   }
 
   try {
-    // 4. Chamada para Atualizar Status no Firebase
-    console.log(`[API: authorize] Iniciando atualização da aposta ${body.betId} para o status: ${body.status}.`);
-    await updateBetPaymentStatus(body.betId, body.status);
-    console.log(`[API: authorize] Aposta ${body.betId} atualizada com sucesso para ${body.status}.`);
+    // 4. Chamada para Atualizar Status no Firebase (usando a NOVA FUNÇÃO para atualizar por inviteId)
+    console.log(`[API: authorize] Iniciando atualização do convite ${body.inviteId} para o status: ${body.status}.`);
+    await updateBetsPaymentStatusByInvite(body.inviteId, body.status); // Usa a nova função
+    console.log(`[API: authorize] Convite ${body.inviteId} atualizado com sucesso para ${body.status}.`);
     
     // 5. Sucesso
-    return NextResponse.json({ success: true, message: `Aposta ${body.betId} ${body.status === 'approved' ? 'aprovada' : 'rejeitada'} com sucesso.` });
+    // Mensagem de sucesso adaptada para a operação em grupo
+    return NextResponse.json({ success: true, message: `Todas as apostas do convite ${body.inviteId} foram ${body.status === 'approved' ? 'aprovadas' : 'rejeitadas'} com sucesso.` });
   } catch (error) {
     // 6. Erro na Lógica de Negócio (Firebase ou outra)
-    console.error(`[API: authorize] Erro ao autorizar aposta ${body.betId}:`, error);
+    console.error(`[API: authorize] Erro ao autorizar convite ${body.inviteId}:`, error);
     // Sempre retorna JSON em caso de erro na lógica
-    return NextResponse.json({ message: 'Erro ao autorizar aposta. Verifique os logs do servidor para mais detalhes.' }, { status: 500 });
+    return NextResponse.json({ message: 'Erro ao autorizar convite. Verifique os logs do servidor para mais detalhes.' }, { status: 500 });
   } finally {
       console.log('--- [API: /api/admin/bets/authorize] Fim da requisição POST ---');
   }

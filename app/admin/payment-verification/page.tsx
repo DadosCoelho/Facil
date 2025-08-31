@@ -5,55 +5,76 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, AlertCircle, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { BetData, PaymentStatus } from '@/lib/firebase-db'; // Importe BetData e PaymentStatus
+// Importe a nova interface InviteGroupData e os tipos BetData, PaymentStatus
+import { BetData, PaymentStatus, InviteGroupData } from '@/lib/firebase-db'; 
 
 export default function PaymentVerificationPage() {
-  const [pendingBets, setPendingBets] = useState<BetData[]>([]);
+  // NOVO ESTADO: Armazena grupos de convites pendentes
+  const [pendingInviteGroups, setPendingInviteGroups] = useState<InviteGroupData[]>([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [processing, setProcessing] = useState<{ betId: string | null; action: PaymentStatus | null }>({ betId: null, action: null });
+  // NOVO ESTADO: 'processing' agora monitora o inviteId que está sendo processado
+  const [processing, setProcessing] = useState<{ inviteId: string | null; action: PaymentStatus | null }>({ inviteId: null, action: null });
   const router = useRouter();
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
 
   useEffect(() => {
     const token = sessionStorage.getItem('adminToken');
+    const storedSelectedCampaignId = sessionStorage.getItem('selectedCampaignId'); // Obtém a campanha selecionada
+
     if (!token) {
       router.push('/admin/login');
       return;
     }
-    fetchPendingBets();
-  }, [router]);
+    // Garante que uma campanha esteja selecionada para exibir os pagamentos
+    if (!storedSelectedCampaignId) {
+        alert('Nenhuma campanha selecionada. Por favor, selecione uma campanha.');
+        router.push('/admin/campaigns'); // Redireciona para a seleção de campanha se nenhuma for ativa
+        return;
+    }
+    setSelectedCampaignId(storedSelectedCampaignId);
 
-  const fetchPendingBets = async () => {
+    // Chama a função de busca com o ID da campanha selecionada
+    fetchPendingInviteGroups(storedSelectedCampaignId);
+  }, [router]); // Dependência do router para garantir que o efeito rode após redirecionamentos
+
+  // NOVO: Função para buscar grupos de convites pendentes filtrados por campanha
+  const fetchPendingInviteGroups = async (campaignId: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/bets/pending', { // NOVO ENDPOINT DE API (você precisará criar ele ou adaptar a getBetsByPaymentStatus)
+      // Faz a requisição para a API, passando o campaignId
+      const response = await fetch(`/api/admin/bets/pending?campaignId=${campaignId}`, { 
         headers: {
           'Authorization': `Bearer ${sessionStorage.getItem('adminToken')}`,
         },
       });
 
       if (!response.ok) {
+        // Lida com a autenticação expirada ou inválida
         if (response.status === 401) {
           sessionStorage.removeItem('adminToken');
           sessionStorage.removeItem('adminEmail');
+          sessionStorage.removeItem('selectedCampaignId');
           router.push('/admin/login');
           return;
         }
-        throw new Error('Erro ao carregar apostas pendentes.');
+        throw new Error('Erro ao carregar convites pendentes.');
       }
 
-      const data: BetData[] = await response.json();
-      setPendingBets(data);
+      // A API agora retorna uma lista de InviteGroupData
+      const data: InviteGroupData[] = await response.json(); 
+      setPendingInviteGroups(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido ao carregar apostas pendentes.');
+      setError(err instanceof Error ? err.message : 'Erro desconhecido ao carregar convites pendentes.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateBetStatus = async (betId: string, status: PaymentStatus) => {
-    setProcessing({ betId, action: status });
+  // NOVO: Função para atualizar o status de um convite completo (todas as suas apostas)
+  const handleUpdateInviteStatus = async (inviteId: string, status: PaymentStatus) => {
+    setProcessing({ inviteId, action: status }); // Define o estado de processamento para o convite específico
     setError(null);
     try {
       const response = await fetch('/api/admin/bets/authorize', {
@@ -62,13 +83,13 @@ export default function PaymentVerificationPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${sessionStorage.getItem('adminToken')}`,
         },
-        body: JSON.stringify({ betId, status }),
+        // Envia o inviteId e o status para a API
+        body: JSON.stringify({ inviteId, status }), 
       });
 
       if (!response.ok) {
-        // Resposta pode vir como HTML (página de erro) em casos de falha do servidor.
-        // Tenta parsear JSON; se falhar, usa o texto cru como mensagem de erro.
-        let errorMessage = `Erro ao ${status === 'approved' ? 'aprovar' : 'rejeitar'} aposta.`;
+        let errorMessage = `Erro ao ${status === 'approved' ? 'aprovar' : 'rejeitar'} convite.`;
+        // Lógica aprimorada para extrair mensagem de erro da resposta da API
         try {
           const contentType = response.headers.get('content-type') || '';
           if (contentType.includes('application/json')) {
@@ -76,28 +97,26 @@ export default function PaymentVerificationPage() {
             errorMessage = errorData?.message || errorMessage;
           } else {
             const text = await response.text();
-            // tenta extrair mensagem JSON caso o servidor tenha retornado JSON como texto
             try {
               const parsed = JSON.parse(text);
               errorMessage = parsed?.message || text || errorMessage;
             } catch {
-              // resposta não é JSON, usa texto (pode ser HTML)
-              // remove tags HTML se houver para mostrar uma mensagem curta
               errorMessage = text.replace(/<[^>]*>/g, '').trim().slice(0, 300) || errorMessage;
             }
           }
         } catch (e) {
-          // fallback para mensagem padrão
+          // fallback para mensagem padrão se o parse falhar
         }
         throw new Error(errorMessage);
       }
 
-      alert(`Aposta ${betId} ${status === 'approved' ? 'aprovada' : 'rejeitada'} com sucesso!`);
-      fetchPendingBets(); // Atualiza a lista de apostas
+      alert(`Convite ${inviteId} ${status === 'approved' ? 'aprovado' : 'rejeitado'} com sucesso!`);
+      // Recarrega os dados para atualizar a lista após a operação, usando o ID da campanha selecionada
+      selectedCampaignId && fetchPendingInviteGroups(selectedCampaignId); 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao processar aposta.');
+      setError(err instanceof Error ? err.message : 'Erro ao processar convite.');
     } finally {
-      setProcessing({ betId: null, action: null });
+      setProcessing({ inviteId: null, action: null }); // Limpa o estado de processamento
     }
   };
 
@@ -106,7 +125,7 @@ export default function PaymentVerificationPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
-          <p className="text-muted">Carregando apostas pendentes...</p>
+          <p className="text-muted">Carregando convites pendentes da campanha...</p>
         </div>
       </div>
     );
@@ -119,7 +138,7 @@ export default function PaymentVerificationPage() {
           <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">Erro ao Carregar</h1>
           <p className="text-muted mb-6">{error}</p>
-          <button onClick={fetchPendingBets} className="btn btn-primary">
+          <button onClick={() => selectedCampaignId && fetchPendingInviteGroups(selectedCampaignId)} className="btn btn-primary">
             Tentar Novamente
           </button>
           <div className="mt-4">
@@ -136,64 +155,74 @@ export default function PaymentVerificationPage() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold">Verificar Pagamentos</h1>
+          {/* Exibe o ID da campanha para clareza */}
+          <h1 className="text-xl font-bold">Verificar Pagamentos (Campanha: {selectedCampaignId})</h1>
           <Link href="/admin" className="btn btn-ghost">← Voltar</Link>
         </div>
       </header>
       <main className="container mx-auto px-4 py-8">
-        {pendingBets.length === 0 ? (
+        {pendingInviteGroups.length === 0 ? (
           <div className="card p-12 text-center text-muted">
             <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-            <p className="text-lg font-semibold">Nenhuma aposta pendente de verificação.</p>
-            <p className="text-sm mt-2">Todas as apostas foram revisadas ou não há novas submissões.</p>
+            <p className="text-lg font-semibold">Nenhum convite pendente de verificação para esta campanha.</p>
+            <p className="text-sm mt-2">Todas as apostas foram revisadas ou não há novas submissões pendentes.</p>
           </div>
         ) : (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold mb-4">Apostas Pendentes ({pendingBets.length})</h2>
-            {pendingBets.map((bet) => (
-              <div key={bet.id} className="card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 className="text-2xl font-bold mb-4">Convites Pendentes ({pendingInviteGroups.length})</h2>
+            {pendingInviteGroups.map((group) => (
+              <div key={group.inviteId} className="card p-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
                 <div className="flex-grow">
                   <div className="flex items-center gap-2 mb-2">
                     <Clock className="w-5 h-5 text-warn" />
-                    <span className="font-semibold text-lg">{bet.participantName}</span>
-                    <span className="text-sm text-muted">- ID: {bet.id.substring(0, 8)}...</span>
+                    <span className="font-semibold text-lg">{group.participantName}</span>
+                    <span className="text-sm text-muted">- Convite ID: {group.inviteId.substring(0, 8)}...</span>
                   </div>
                   <div className="text-muted text-sm mb-3">
-                    Campanha: <span className="font-semibold text-foreground">{bet.campaignId}</span> | 
-                    Data: {new Date(bet.createdAt).toLocaleString('pt-BR')}
+                    Campanha: <span className="font-semibold text-foreground">{group.campaignId}</span> | 
+                    Data do Primeiro Jogo: {new Date(group.firstBetCreatedAt).toLocaleString('pt-BR')}
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {bet.numbers.map((num) => (
-                      <span
-                        key={num}
-                        className="w-8 h-8 rounded-lg text-sm flex items-center justify-center bg-primary/20 text-primary font-medium"
-                      >
-                        {num.toString().padStart(2, '0')}
-                      </span>
+                  <p className="text-base font-semibold mb-2">
+                    Total de {group.bets.length} jogo{group.bets.length > 1 ? 's' : ''}, somando {group.totalShares} cota{group.totalShares > 1 ? 's' : ''}.
+                  </p>
+                  <div className="space-y-2">
+                    {group.bets.map(bet => (
+                      <div key={bet.id} className="border border-border rounded-md p-2">
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="font-medium">Jogo ID: {bet.id.substring(0, 8)}...</span>
+                          <span className="text-muted">{bet.shares} cota{bet.shares > 1 ? 's' : ''}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {bet.numbers.map(num => (
+                            <span key={num} className="w-7 h-7 rounded bg-primary/10 text-primary text-xs flex items-center justify-center font-medium">
+                              {num.toString().padStart(2, '0')}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     ))}
-                  </div>
-                  <div className="text-base">
-                    <span className="font-semibold">{bet.shares} cota{bet.shares > 1 ? 's' : ''}</span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-2 md:w-40">
                   <button
                     type="button"
-                    onClick={() => handleUpdateBetStatus(bet.id, 'approved')}
+                    onClick={() => handleUpdateInviteStatus(group.inviteId, 'approved')}
                     className="btn btn-primary flex items-center justify-center gap-2"
-                    disabled={processing.betId === bet.id && processing.action !== null}
+                    // Desabilita se este convite já estiver sendo processado
+                    disabled={processing.inviteId === group.inviteId && processing.action !== null}
                   >
-                    {processing.betId === bet.id && processing.action === 'approved' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-                    {processing.betId === bet.id && processing.action === 'approved' ? 'Aprovando...' : 'Aprovar'}
+                    {processing.inviteId === group.inviteId && processing.action === 'approved' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                    {processing.inviteId === group.inviteId && processing.action === 'approved' ? 'Aprovando...' : 'Aprovar Convite'}
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleUpdateBetStatus(bet.id, 'rejected')}
+                    onClick={() => handleUpdateInviteStatus(group.inviteId, 'rejected')}
                     className="btn btn-danger flex items-center justify-center gap-2"
-                    disabled={processing.betId === bet.id && processing.action !== null}
+                    // Desabilita se este convite já estiver sendo processado
+                    disabled={processing.inviteId === group.inviteId && processing.action !== null}
                   >
-                    {processing.betId === bet.id && processing.action === 'rejected' ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-                    {processing.betId === bet.id && processing.action === 'rejected' ? 'Rejeitando...' : 'Rejeitar'}
+                    {processing.inviteId === group.inviteId && processing.action === 'rejected' ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                    {processing.inviteId === group.inviteId && processing.action === 'rejected' ? 'Rejeitando...' : 'Rejeitar Convite'}
                   </button>
                 </div>
               </div>

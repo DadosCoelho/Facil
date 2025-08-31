@@ -7,16 +7,25 @@ import Link from 'next/link';
 import { Loader2, AlertCircle, BarChart3, Users, TrendingUp, ArrowLeft } from 'lucide-react';
 import { BetData, PaymentStatus } from '@/lib/firebase-db'; // Importe BetData e PaymentStatus
 
+// NOVO: Interface para agrupar apostas por participante no frontend
+interface ParticipantGroup {
+  inviteId: string;
+  participantName: string;
+  bets: BetData[];
+  totalSharesInGroup: number;
+}
+
 interface CampaignBetsData {
   campaignId: string;
   campaignName: string;
   totalBets: number;
   totalShares: number;
-  bets: BetData[]; // Use BetData aqui
+  bets: BetData[]; // Mantemos como lista plana aqui, para agrupar no frontend
 }
 
 export default function CampaignBetsDashboardPage() {
   const [data, setData] = useState<CampaignBetsData | null>(null);
+  const [groupedBets, setGroupedBets] = useState<ParticipantGroup[]>([]); // NOVO ESTADO: Armazenará os grupos de apostas
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -42,13 +51,32 @@ export default function CampaignBetsDashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        // Altere a chamada para incluir o filtro de status de pagamento 'approved'
+        // A API retorna apenas apostas aprovadas para este dashboard por padrão
         const response = await fetch(`/api/campaign-bets?campaignId=${campaignId}&paymentStatus=approved`);
         if (!response.ok) {
           throw new Error('Erro ao carregar dados das apostas da campanha.');
         }
         const result: CampaignBetsData = await response.json();
         setData(result);
+
+        // NOVO: Lógica para agrupar as apostas por participante (inviteId)
+        const groups: { [key: string]: ParticipantGroup } = {};
+        result.bets.forEach(bet => {
+          if (!groups[bet.inviteId]) {
+            groups[bet.inviteId] = {
+              inviteId: bet.inviteId,
+              // Usa o nome do participante se disponível, caso contrário, um ID parcial
+              participantName: bet.participantName || `Participante ${bet.inviteId.substring(0, 4)}...`,
+              bets: [],
+              totalSharesInGroup: 0
+            };
+          }
+          groups[bet.inviteId].bets.push(bet);
+          groups[bet.inviteId].totalSharesInGroup += bet.shares;
+        });
+        // Converte o objeto de grupos em um array e ordena (opcional, aqui por nome do participante)
+        setGroupedBets(Object.values(groups).sort((a, b) => a.participantName.localeCompare(b.participantName)));
+
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erro desconhecido ao carregar dados.');
       } finally {
@@ -57,7 +85,7 @@ export default function CampaignBetsDashboardPage() {
     };
 
     fetchBetsData(targetCampaignId);
-  }, [searchParams]);
+  }, [searchParams]); // Dependência do searchParams para recarregar se o ID da campanha mudar via URL
 
   if (loading) {
     return (
@@ -86,7 +114,7 @@ export default function CampaignBetsDashboardPage() {
   }
 
   if (!data) {
-    return null;
+    return null; // Não renderiza nada se não houver dados após o carregamento
   }
 
   return (
@@ -136,40 +164,49 @@ export default function CampaignBetsDashboardPage() {
           </div>
         </div>
 
+        {/* NOVO: Seção de Lista de Grupos de Apostas por Participante */}
         <div className="card p-6">
-          <h2 className="mb-4 text-xl font-semibold">Lista de Apostas Aprovadas</h2>
-          {data.bets.length === 0 ? (
+          <h2 className="mb-4 text-xl font-semibold">Apostas Aprovadas por Participante</h2>
+          {groupedBets.length === 0 ? (
             <p className="text-muted">Nenhuma aposta aprovada para esta campanha ainda.</p>
           ) : (
-            <div className="space-y-4">
-              {data.bets.map((bet, index) => (
-                <div key={bet.id} className="rounded-lg border border-border p-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="font-semibold">
-                      {bet.participantName || `Participante ${bet.inviteId.substring(0, 4)}...`}
-                    </span>
-                    <span className="text-sm text-muted">
-                      {new Date(bet.createdAt).toLocaleString('pt-BR')}
-                    </span>
+            <div className="space-y-6">
+              {groupedBets.map((group, groupIndex) => (
+                <div key={group.inviteId} className="rounded-lg border border-border p-4 bg-card-secondary">
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="font-bold text-lg">{group.participantName}</h3>
+                    <span className="text-sm text-muted">Total de Cotas: {group.totalSharesInGroup}</span>
                   </div>
-                  <div className="mb-2 flex flex-wrap gap-2">
-                    {bet.numbers.map((num) => (
-                      <span
-                        key={num}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20 text-sm font-medium text-primary"
-                      >
-                        {num.toString().padStart(2, '0')}
-                      </span>
+                  <p className="text-sm text-muted mb-2">Apostas deste convite ({group.bets.length}):</p>
+                  <div className="space-y-3">
+                    {group.bets.map((bet) => (
+                      <div key={bet.id} className="rounded-lg border border-border p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-sm">Aposta ID: {bet.id.substring(0, 8)}...</span>
+                          <span className="text-sm text-muted">{new Date(bet.createdAt).toLocaleString('pt-BR')}</span>
+                        </div>
+                        <div className="mb-2 flex flex-wrap gap-2">
+                          {bet.numbers.map((num) => (
+                            <span
+                              key={num}
+                              className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/20 text-xs font-medium text-primary"
+                            >
+                              {num.toString().padStart(2, '0')}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="text-sm text-muted">
+                          {bet.shares} cota{bet.shares > 1 ? 's' : ''}
+                        </div>
+                      </div>
                     ))}
-                  </div>
-                  <div className="text-sm text-muted">
-                    {bet.shares} cota{bet.shares > 1 ? 's' : ''}
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
+        {/* Fim da NOVO: Seção de Lista de Grupos de Apostas por Participante */}
 
         <div className="mt-8 text-center">
           {sessionStorage.getItem('adminToken') ? (
