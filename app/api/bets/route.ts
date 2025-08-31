@@ -2,8 +2,9 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { addBetToFirebase } from '@/lib/firebase-db';
+import { addBetToFirebase, BetData } from '@/lib/firebase-db'; 
 import { verifyInviteToken } from '@/lib/jwt'; 
+import { randomUUID } from 'crypto'; // Para IDs únicos (Node's built-in alternative to uuid)
 
 export async function POST(request: Request) {
     let requestBody;
@@ -40,27 +41,24 @@ export async function POST(request: Request) {
     const response = NextResponse.json({ 
         transactionId, 
         status: 'processing', 
-        message: 'Sua aposta está sendo processada e será confirmada em breve. Aguarde para ser redirecionado.',
+        message: 'Sua aposta foi recebida e está aguardando aprovação do administrador. Você será redirecionado para a página de confirmação.',
         redirectDelay: 2000
     });
 
     (async () => {
         try {
             for (const bet of bets) {
-                const betDataToSave = {
-                    id: bet.id || transactionId, 
+                const betDataToSave: BetData = { // Use o tipo BetData
+                    id: randomUUID(), // Use Node randomUUID para IDs únicos para cada aposta
                     numbers: bet.numbers,
                     shares: bet.shares,
                     createdAt: new Date().toISOString(),
-                    status: 'active', 
+                    status: 'active', // Status da aposta em si
                     campaignId: decodedToken.campaignId || 'DEFAULT_CAMPAIGN_ID',
                     inviteId: decodedToken.inviteId || 'UNKNOWN_INVITE',
                     participantSessionId: decodedToken.inviteId,
-                    // =========================================================
-                    // NOVO: Adiciona o nome do participante à aposta salva
-                    // =========================================================
                     participantName: decodedToken.participant?.name || 'Participante Anônimo',
-                    // =========================================================
+                    paymentStatus: 'pending' // Define o status de pagamento como 'pending'
                 };
 
                 await addBetToFirebase(betDataToSave);

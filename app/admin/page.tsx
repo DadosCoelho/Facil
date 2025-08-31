@@ -16,6 +16,7 @@ import {
   LogOut,
   AlertCircle,
   Eye, 
+  CheckSquare // ADICIONADO: Ícone CheckSquare
 } from 'lucide-react'
 
 interface DashboardStats {
@@ -113,14 +114,14 @@ export default function AdminDashboardPage() {
     )
   }
 
-  if (!stats) {
+  if (!stats) { // Adicionada esta verificação
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="card p-8 max-w-md mx-auto text-center">
           <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">Erro ao Carregar</h1>
           <p className="text-muted mb-6">{error}</p>
-          <button onClick={() => loadDashboardData(selectedCampaignId!)} className="btn btn-primary"> 
+          <button onClick={() => selectedCampaignId && loadDashboardData(selectedCampaignId)} className="btn btn-primary"> 
             Tentar Novamente
           </button>
           <div className="mt-4">
@@ -194,58 +195,7 @@ export default function AdminDashboardPage() {
             </div>
         </div>
 
-        {/* REMOVIDO: Stats Grid (Total de Apostas, Cotas, Participantes, Recentes) */}
-        {/* <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="card p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <BarChart3 className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted">Total de Apostas</p>
-                  <p className="text-2xl font-bold">{stats.totalBets}</p>
-                </div>
-              </div>
-            </div>
-  
-            <div className="card p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted">Total de Cotas</p>
-                  <p className="text-2xl font-bold">{stats.totalShares}</p>
-                </div>
-              </div>
-            </div>
-  
-            <div className="card p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted">Participantes</p>
-                  <p className="text-2xl font-bold">{stats.totalParticipants}</p>
-                </div>
-              </div>
-            </div>
-  
-            <div className="card p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Activity className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted">Apostas Recentes</p>
-                  <p className="text-2xl font-bold">{stats.recentBets}</p>
-                </div>
-              </div>
-            </div>
-          </div> */}
-
-        {/* Quick Actions (Mantidos) */}
+        {/* Quick Actions */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <Link href="/admin/campaigns" className="card p-6 hover:border-primary transition-colors group">
               <div className="flex items-center gap-4">
@@ -258,7 +208,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             </Link>
-
+  
           <Link href="/admin/convites" className="card p-6 hover:border-primary transition-colors group">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -279,6 +229,19 @@ export default function AdminDashboardPage() {
               <div>
                 <h3 className="font-semibold mb-1">Ver Apostas da Campanha</h3>
                 <p className="text-sm text-muted">Acompanhar todas as apostas registradas</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* NOVO: Link para a página de Verificação de Pagamentos */}
+          <Link href="/admin/payment-verification" className="card p-6 hover:border-primary transition-colors group">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <CheckSquare className="w-6 h-6 text-primary" /> {/* Ícone para verificação */}
+              </div>
+              <div>
+                <h3 className="font-semibold mb-1">Verificar Pagamentos</h3>
+                <p className="text-sm text-muted">Aprovar ou rejeitar apostas pendentes</p>
               </div>
             </div>
           </Link>
@@ -311,26 +274,6 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         </div>
-
-        {/* REMOVIDO: Navigation Links (últimos 4 botões) */}
-        {/* <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link href="/admin/campaigns" className="btn btn-ghost py-3 flex items-center justify-center gap-2">
-                <Eye className="w-4 h-4" />
-                Gerenciar Campanhas
-            </Link>
-          <Link href="/admin/convites" className="btn btn-ghost py-3 flex items-center justify-center gap-2">
-            <Plus className="w-4 h-4" />
-            Convites
-          </Link>
-          <Link href={`/admin/campaign-bets-dashboard?campaignId=${selectedCampaignId}`} className="btn btn-ghost py-3 flex items-center justify-center gap-2">
-            <FileText className="w-4 h-4" />
-            Ver Apostas da Campanha
-          </Link>
-            <Link href={`/admin/campaigns/edit/${selectedCampaignId}`} className="btn btn-ghost py-3 flex items-center justify-center gap-2">
-              <Settings className="w-4 h-4" />
-              Configurações da Campanha
-            </Link>
-        </div> */}
       </main>
     </div>
   )

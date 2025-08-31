@@ -157,3 +157,6 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Firebase
+facil-61f9e-firebase-adminsdk-fbsvc-f91bf555c5

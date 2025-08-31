@@ -2,11 +2,13 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { getCampaignBetsFromFirebase, getCampaignById, getAllCampaigns } from '@/lib/firebase-db';
+// Importe as funções que agora aceitam o paymentStatusFilter
+import { getCampaignBetsFromFirebase, getCampaignById, getAllCampaigns, PaymentStatus } from '@/lib/firebase-db';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const campaignIdParam = url.searchParams.get('campaignId');
+  const paymentStatusParam = url.searchParams.get('paymentStatus'); // NOVO: Captura o parâmetro paymentStatus
 
   let currentCampaignId: string | null = campaignIdParam;
   let campaignName: string = 'Campanha Desconhecida';
@@ -32,7 +34,14 @@ export async function GET(request: Request) {
       campaignName = campaign.name;
     }
 
-    const bets = await getCampaignBetsFromFirebase(currentCampaignId);
+    // Converta o parâmetro de string para o tipo PaymentStatus
+    const filterStatus: PaymentStatus | undefined = 
+        paymentStatusParam === 'pending' || paymentStatusParam === 'approved' || paymentStatusParam === 'rejected'
+        ? (paymentStatusParam as PaymentStatus)
+        : undefined;
+
+    // Passe o filtro de status para a função do Firebase
+    const bets = await getCampaignBetsFromFirebase(currentCampaignId, filterStatus);
 
     // Formata as apostas incluindo o nome do participante salvo
     const formattedBets = bets.map(bet => ({

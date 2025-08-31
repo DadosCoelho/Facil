@@ -5,26 +5,14 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, AlertCircle, BarChart3, Users, TrendingUp, ArrowLeft } from 'lucide-react';
-
-interface Bet {
-  id: string;
-  numbers: number[];
-  shares: number;
-  createdAt: string;
-  status: string;
-  participantName?: string;
-  // =========================================================
-  // CORREÇÃO: Adicionando a propriedade inviteId
-  // =========================================================
-  inviteId: string; 
-}
+import { BetData, PaymentStatus } from '@/lib/firebase-db'; // Importe BetData e PaymentStatus
 
 interface CampaignBetsData {
   campaignId: string;
   campaignName: string;
   totalBets: number;
   totalShares: number;
-  bets: Bet[];
+  bets: BetData[]; // Use BetData aqui
 }
 
 export default function CampaignBetsDashboardPage() {
@@ -54,7 +42,8 @@ export default function CampaignBetsDashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/campaign-bets?campaignId=${campaignId}`);
+        // Altere a chamada para incluir o filtro de status de pagamento 'approved'
+        const response = await fetch(`/api/campaign-bets?campaignId=${campaignId}&paymentStatus=approved`);
         if (!response.ok) {
           throw new Error('Erro ao carregar dados das apostas da campanha.');
         }
@@ -129,7 +118,7 @@ export default function CampaignBetsDashboardPage() {
                 <BarChart3 className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted">Total de Apostas</p>
+                <p className="text-sm text-muted">Total de Apostas Aprovadas</p>
                 <p className="text-2xl font-bold">{data.totalBets}</p>
               </div>
             </div>
@@ -140,7 +129,7 @@ export default function CampaignBetsDashboardPage() {
                 <TrendingUp className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted">Total de Cotas</p>
+                <p className="text-sm text-muted">Total de Cotas Aprovadas</p>
                 <p className="text-2xl font-bold">{data.totalShares}</p>
               </div>
             </div>
@@ -148,16 +137,15 @@ export default function CampaignBetsDashboardPage() {
         </div>
 
         <div className="card p-6">
-          <h2 className="mb-4 text-xl font-semibold">Lista de Apostas</h2>
+          <h2 className="mb-4 text-xl font-semibold">Lista de Apostas Aprovadas</h2>
           {data.bets.length === 0 ? (
-            <p className="text-muted">Nenhuma aposta registrada para esta campanha ainda.</p>
+            <p className="text-muted">Nenhuma aposta aprovada para esta campanha ainda.</p>
           ) : (
             <div className="space-y-4">
               {data.bets.map((bet, index) => (
                 <div key={bet.id} className="rounded-lg border border-border p-4">
                   <div className="mb-2 flex items-center justify-between">
                     <span className="font-semibold">
-                      {/* CORREÇÃO: Usando a propriedade inviteId agora disponível */}
                       {bet.participantName || `Participante ${bet.inviteId.substring(0, 4)}...`}
                     </span>
                     <span className="text-sm text-muted">
