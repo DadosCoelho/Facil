@@ -4,8 +4,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, AlertCircle, BarChart3, Users, TrendingUp, ArrowLeft } from 'lucide-react';
-import { BetData, PaymentStatus } from '@/lib/firebase-db'; // Importe BetData e PaymentStatus
+import { Loader2, AlertCircle, BarChart3, Users, TrendingUp } from 'lucide-react'; // Removido ArrowLeft
+import { BetData, PaymentStatus } from '@/lib/firebase-db'; 
 
 // NOVO: Interface para agrupar apostas por participante no frontend
 interface ParticipantGroup {
@@ -51,7 +51,6 @@ export default function CampaignBetsDashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        // A API retorna apenas apostas aprovadas para este dashboard por padrão
         const response = await fetch(`/api/campaign-bets?campaignId=${campaignId}&paymentStatus=approved`);
         if (!response.ok) {
           throw new Error('Erro ao carregar dados das apostas da campanha.');
@@ -59,13 +58,11 @@ export default function CampaignBetsDashboardPage() {
         const result: CampaignBetsData = await response.json();
         setData(result);
 
-        // NOVO: Lógica para agrupar as apostas por participante (inviteId)
         const groups: { [key: string]: ParticipantGroup } = {};
         result.bets.forEach(bet => {
           if (!groups[bet.inviteId]) {
             groups[bet.inviteId] = {
               inviteId: bet.inviteId,
-              // Usa o nome do participante se disponível, caso contrário, um ID parcial
               participantName: bet.participantName || `Participante ${bet.inviteId.substring(0, 4)}...`,
               bets: [],
               totalSharesInGroup: 0
@@ -74,7 +71,6 @@ export default function CampaignBetsDashboardPage() {
           groups[bet.inviteId].bets.push(bet);
           groups[bet.inviteId].totalSharesInGroup += bet.shares;
         });
-        // Converte o objeto de grupos em um array e ordena (opcional, aqui por nome do participante)
         setGroupedBets(Object.values(groups).sort((a, b) => a.participantName.localeCompare(b.participantName)));
 
       } catch (err) {
@@ -85,7 +81,7 @@ export default function CampaignBetsDashboardPage() {
     };
 
     fetchBetsData(targetCampaignId);
-  }, [searchParams]); // Dependência do searchParams para recarregar se o ID da campanha mudar via URL
+  }, [searchParams]);
 
   if (loading) {
     return (
@@ -114,28 +110,14 @@ export default function CampaignBetsDashboardPage() {
   }
 
   if (!data) {
-    return null; // Não renderiza nada se não houver dados após o carregamento
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          {/* Botão de voltar, condicional para admin ou participante */}
-          {sessionStorage.getItem('adminToken') ? (
-             <Link href="/admin" className="btn btn-ghost p-2">
-                <ArrowLeft className="h-5 w-5" />
-            </Link>
-          ) : (
-            <Link href="/minhas-apostas" className="btn btn-ghost p-2">
-                <ArrowLeft className="h-5 w-5" />
-            </Link>
-          )}
-          
-          {/* Título centralizado, ocupando o espaço restante */}
-          <h1 className="flex-1 text-center text-xl font-bold">Dashboard da Campanha: {data.campaignName}</h1>
-          {/* Placeholder invisível para balancear o botão de voltar e manter o título centralizado */}
-          <div className="w-[36px]"></div>
+        <div className="container mx-auto px-4 py-4 text-center"> {/* Removido 'flex items-center justify-between' e adicionado 'text-center' */}
+          <h1 className="text-xl font-bold">Campanha: {data.campaignName}</h1> {/* Removido 'Dashboard da' e 'flex-1' */}
         </div>
       </header>
       <main className="container mx-auto px-4 py-8">
@@ -164,7 +146,6 @@ export default function CampaignBetsDashboardPage() {
           </div>
         </div>
 
-        {/* NOVO: Seção de Lista de Grupos de Apostas por Participante */}
         <div className="card p-6">
           <h2 className="mb-4 text-xl font-semibold">Apostas Aprovadas por Participante</h2>
           {groupedBets.length === 0 ? (
@@ -206,7 +187,6 @@ export default function CampaignBetsDashboardPage() {
             </div>
           )}
         </div>
-        {/* Fim da NOVO: Seção de Lista de Grupos de Apostas por Participante */}
 
         <div className="mt-8 text-center">
           {sessionStorage.getItem('adminToken') ? (

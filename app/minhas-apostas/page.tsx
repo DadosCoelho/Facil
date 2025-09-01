@@ -232,16 +232,7 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
         <div className="max-w-4xl mx-auto">
           {/* Page Header */}
           <div className="flex items-center gap-4 mb-8">
-            {/* NOVO: Botão "Apostas da Campanha" no lugar do "Voltar" */}
-            {participantData?.campaignId && (
-                <Link 
-                    href={`/admin/campaign-bets-dashboard?campaignId=${participantData.campaignId}`} 
-                    className="btn btn-ghost flex items-center justify-center gap-2"
-                >
-                    <FileText className="w-4 h-4" /> 
-                    Apostas da Campanha
-                </Link>
-            )}
+            {/* O botão "Apostas da Campanha" foi movido para o footer, e está oculto no desktop */}
             
             <div>
               <h1 className="text-3xl font-bold">Minhas Apostas</h1>
@@ -374,9 +365,22 @@ Este relatório foi gerado automaticamente pelo sistema Facil.
             </>
           )}
 
-          {/* REMOVIDO: Botão Criar Nova Aposta */}
-          <div className="mt-8 text-center">
-            <Link href="/" className="btn btn-primary">Voltar ao Início</Link>
+          {/* NOVO: Botão "Apostas da Campanha" e "Voltar ao Início" */}
+          <div className="mt-8 flex flex-col items-center gap-4"> {/* Adiciona flex-col e gap */}
+            {/* Botão "Apostas da Campanha" visível apenas em mobile */}
+            {participantData?.campaignId && (
+                <Link 
+                    href={`/admin/campaign-bets-dashboard?campaignId=${participantData.campaignId}`} 
+                    className="btn btn-primary w-full max-w-xs flex items-center justify-center md:hidden" // w-full max-w-xs para mobile, md:hidden para desktop
+                >
+                    <FileText className="w-4 h-4 mr-2" /> 
+                    Apostas da Campanha
+                </Link>
+            )}
+            {/* Botão "Voltar ao Início" com texto centralizado */}
+            <Link href="/" className="btn btn-primary w-full max-w-xs flex justify-center">
+              Voltar ao Início
+            </Link>
           </div>
         </div>
       </main>
